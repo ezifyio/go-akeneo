@@ -9,6 +9,7 @@ const (
 )
 
 // FamilyService is the interface to interact with the Akeneo Family API
+// todo: query parameters check
 type FamilyService interface {
 	ListWithPagination(options any) ([]Family, Links, error)
 	GetFamily(familyCode string) (*Family, error)

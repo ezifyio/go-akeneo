@@ -28,6 +28,7 @@ type Client struct {
 	Category     CategoryService
 	Channel      ChannelService
 	Locale       LocaleService
+	Media        MediaFileService
 }
 
 func (c *Client) init() error {
@@ -82,6 +83,7 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	c.Category = &categoryOp{c}
 	c.Channel = &channelOp{c}
 	c.Locale = &localeOp{c}
+	c.Media = &mediaOp{c}
 	if err := c.init(); err != nil {
 		return nil, err
 	}

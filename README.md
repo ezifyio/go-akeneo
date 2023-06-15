@@ -38,7 +38,7 @@ if err != nil {
 Once you have a client instance, you can use it to interact with the Akeneo API. The client provides various services for different API endpoints, such as AuthService, ProductService, FamilyService, etc. You can access these services from the client and make API calls:
 
 ```go
-// Example: Get all products
+// Example: Get products
 products,links, err := client.Product.ListWithPagination(nil)
 if err != nil {
 // Handle error

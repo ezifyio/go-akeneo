@@ -366,3 +366,13 @@ type Locale struct {
 	Code    string `json:"code" mapstructure:"code"`
 	Enabled bool   `json:"enabled" mapstructure:"enabled"`
 }
+
+// MediaFile is the struct for an akeneo media file
+type MediaFile struct {
+	Links            Links  `json:"_links,omitempty" mapstructure:"_links"`
+	Code             string `json:"code,omitempty" mapstructure:"code"`
+	OriginalFilename string `json:"original_filename,omitempty" mapstructure:"original_filename"`
+	MimeType         string `json:"mime_type,omitempty" mapstructure:"mime_type"`
+	Size             int    `json:"size,omitempty" mapstructure:"size"`
+	Extension        string `json:"extension,omitempty" mapstructure:"extension"`
+}
