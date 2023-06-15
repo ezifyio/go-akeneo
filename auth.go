@@ -39,8 +39,7 @@ func (a *authOp) GrantByPassword() error {
 	u := a.client.baseURL.ResolveReference(rel)
 	_, err := resty.New().R().
 		SetHeader("Content-Type", defaultContentType).
-		SetAuthScheme("").
-		SetAuthToken(base64BasicAuth(a.client.connector.ClientID, a.client.connector.Secret)).
+		SetHeader("Authorization", base64BasicAuth(a.client.connector.ClientID, a.client.connector.Secret)).
 		SetBody(request).
 		SetResult(result).
 		Execute(http.MethodPost, u.String())
@@ -98,11 +97,11 @@ func (a *authOp) AutoRefreshToken() error {
 }
 
 type authResponse struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int64  `json:"expires_in"`
-	Scope        string `json:"scope"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token,omitempty"`
+	ExpiresIn    int64  `json:"expires_in,omitempty"`
+	Scope        string `json:"scope,omitempty"`
+	TokenType    string `json:"token_type,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 func (a *authResponse) validate() error {
