@@ -23,10 +23,3 @@ func WithRateLimit(limit int, t time.Duration) Option {
 		c.limiter = ratelimit.New(limit, ratelimit.WithoutSlack, ratelimit.Per(t))
 	}
 }
-
-// WithPimVersion sets the version of the Akeneo PIM
-func WithPimVersion(v int) Option {
-	return func(c *Client) {
-		c.osVersion = v
-	}
-}
