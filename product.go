@@ -55,7 +55,7 @@ func (p *productOp) GetAllProducts(options any) (<-chan Product, chan error) {
 
 // ListWithPagination lists products with pagination
 func (p *productOp) ListWithPagination(options any) ([]Product, Links, error) {
-	productResponse := new(ProductsResponse)
+	productResponse := new(productsResponse)
 	if err := p.client.GET(
 		productBasePath,
 		options,
@@ -82,8 +82,8 @@ func (p *productOp) GetProduct(id string, options any) (*Product, error) {
 	return product, nil
 }
 
-// ProductsResponse is the struct for a akeneo products response
-type ProductsResponse struct {
+// productsResponse is the struct for a akeneo products response
+type productsResponse struct {
 	Links       Links        `json:"_links" mapstructure:"_links"`
 	CurrentPage int          `json:"current_page" mapstructure:"current_page"`
 	Embedded    productItems `json:"_embedded" mapstructure:"_embedded"`

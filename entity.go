@@ -82,6 +82,7 @@ type StringValue struct {
 	Data   string `json:"data,omitempty" mapstructure:"data"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (StringValue) ValueType() string {
 	return ValueTypeString
 }
@@ -93,6 +94,7 @@ type StringCollectionValue struct {
 	Data   []string `json:"data,omitempty" mapstructure:"data"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (StringCollectionValue) ValueType() string {
 	return ValueTypeStringCollection
 }
@@ -106,6 +108,7 @@ type NumberValue struct {
 	Data   int    `json:"data,omitempty" mapstructure:"data"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (NumberValue) ValueType() string {
 	return ValueTypeNumber
 }
@@ -123,6 +126,7 @@ type metric struct {
 	Unit   string `json:"unit,omitempty" mapstructure:"unit"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (MetricValue) ValueType() string {
 	return ValueTypeMetric
 }
@@ -152,6 +156,7 @@ type price struct {
 	Currency string `json:"currency,omitempty" mapstructure:"currency"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (PriceValue) ValueType() string {
 	return ValueTypePrice
 }
@@ -176,6 +181,7 @@ type BooleanValue struct {
 	Data   bool   `json:"data,omitempty" mapstructure:"data"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (BooleanValue) ValueType() string {
 	return ValueTypeBoolean
 }
@@ -186,6 +192,7 @@ type linkedData struct {
 	Labels    map[string]string `json:"labels,omitempty" mapstructure:"labels"`
 }
 
+// SimpleSelectValue is the struct for a akeneo simple select type product value
 type SimpleSelectValue struct {
 	Locale     string     `json:"locale,omitempty" mapstructure:"locale"`
 	Scope      string     `json:"scope,omitempty" mapstructure:"scope"`
@@ -193,10 +200,12 @@ type SimpleSelectValue struct {
 	LinkedData linkedData `json:"linked_data,omitempty" mapstructure:"linked_data"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (SimpleSelectValue) ValueType() string {
 	return ValueTypeSimpleSelect
 }
 
+// MultiSelectValue is the struct for a akeneo multi select type product value
 type MultiSelectValue struct {
 	Locale     string                `json:"locale,omitempty" mapstructure:"locale"`
 	Scope      string                `json:"scope,omitempty" mapstructure:"scope"`
@@ -204,6 +213,7 @@ type MultiSelectValue struct {
 	LinkedData map[string]linkedData `json:"linked_data,omitempty" mapstructure:"linked_data"`
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (MultiSelectValue) ValueType() string {
 	return ValueTypeMultiSelect
 }
@@ -216,6 +226,7 @@ type TableValue struct {
 	Data   []map[string]any
 }
 
+// ValueType returns the value type, see ValueTypeConst
 func (TableValue) ValueType() string {
 	return ValueTypeTable
 }
@@ -247,4 +258,29 @@ type QualityScore struct {
 	Scope  string `json:"scope,omitempty" validate:"required"`
 	Locale string `json:"locale,omitempty" validate:"required"`
 	Data   string `json:"data,omitempty" validate:"required"`
+}
+
+// Family is the struct for a akeneo family
+type Family struct {
+	Links                 Links               `json:"_links,omitempty" mapstructure:"_links"`
+	Code                  string              `json:"code,omitempty" mapstructure:"code"`                                     // The code of the family
+	AttributeAsLabel      string              `json:"attribute_as_label,omitempty" mapstructure:"attribute_as_label"`         // The code of the attribute used as label for the family
+	AttributeAsImage      string              `json:"attribute_as_image,omitempty" mapstructure:"attribute_as_image"`         // Attribute code used as the main picture in the user interface (only since v2.fmt
+	Attributes            []string            `json:"attributes,omitempty" mapstructure:"attributes"`                         //  Attributes codes that compose the family
+	AttributeRequirements map[string][]string `json:"attribute_requirements,omitempty" mapstructure:"attribute_requirements"` //  • Attributes codes of the family that are required for the completeness calculation for the channel `channelCode`
+	Labels                map[string]string   `json:"labels,omitempty" mapstructure:"labels"`                                 //  Translatable labels. Ex: {"en_US": "T-shirt", "fr_FR": "T-shirt"}
+}
+
+// FamilyVariant is the struct for a akeneo family variant
+type FamilyVariant struct {
+	Links                Links                 `json:"_links,omitempty" mapstructure:"_links"`
+	Code                 string                `json:"code,omitempty" mapstructure:"code"`                                     // The code of the family variant
+	Lables               map[string]string     `json:"labels,omitempty" mapstructure:"labels"`                                 // Translatable labels. Ex: {"en_US": "T-shirt", "fr_FR": "T-shirt"}
+	VariantAttributeSets []variantAttributeSet `json:"variant_attribute_sets,omitempty" mapstructure:"variant_attribute_sets"` // The variant attribute sets of the family variant
+}
+
+type variantAttributeSet struct {
+	Level      int      `json:"level,omitempty" mapstructure:"level"`           // The level of the variant attribute set
+	Axes       []string `json:"axes,omitempty" mapstructure:"axes"`             // The axes of the variant attribute set
+	Attributes []string `json:"attributes,omitempty" mapstructure:"attributes"` // The attributes of the variant attribute set
 }

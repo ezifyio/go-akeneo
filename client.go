@@ -22,6 +22,8 @@ type Client struct {
 	osVersion    int               // osVersion is the version of the OS
 	limiter      ratelimit.Limiter // limiter, default 5 requests per second
 	Auth         AuthService
+	Product      ProductService
+	Family       FamilyService
 }
 
 func (c *Client) init() error {
@@ -68,7 +70,10 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	for _, opt := range opts {
 		opt(c)
 	}
+	// Set services
 	c.Auth = &authOp{c}
+	c.Product = &productOp{c}
+	c.Family = &familyOp{c}
 	if err := c.init(); err != nil {
 		return nil, err
 	}
