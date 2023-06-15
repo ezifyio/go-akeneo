@@ -24,6 +24,7 @@ type Client struct {
 	Auth         AuthService
 	Product      ProductService
 	Family       FamilyService
+	Attribute    AttributeService
 }
 
 func (c *Client) init() error {
@@ -74,6 +75,7 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	c.Auth = &authOp{c}
 	c.Product = &productOp{c}
 	c.Family = &familyOp{c}
+	c.Attribute = &attributeOp{c}
 	if err := c.init(); err != nil {
 		return nil, err
 	}

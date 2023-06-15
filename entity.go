@@ -284,3 +284,46 @@ type variantAttributeSet struct {
 	Axes       []string `json:"axes,omitempty" mapstructure:"axes"`             // The axes of the variant attribute set
 	Attributes []string `json:"attributes,omitempty" mapstructure:"attributes"` // The attributes of the variant attribute set
 }
+
+// Attribute is the struct for a akeneo attribute,see:
+// https://api.akeneo.com/api-reference.html#Attribute
+type Attribute struct {
+	Links               Links             `json:"_links" mapstructure:"_links"`
+	Code                string            `json:"code" mapstructure:"code"`
+	Type                string            `json:"type" mapstructure:"type"`
+	Labels              map[string]string `json:"labels" mapstructure:"labels"`
+	Group               string            `json:"group" mapstructure:"group"`
+	GroupLabels         map[string]string `json:"group_labels" mapstructure:"group_labels"`
+	SortOrder           int               `json:"sort_order" mapstructure:"sort_order"`
+	Localizable         bool              `json:"localizable" mapstructure:"localizable"`                       // whether the attribute is localizable or not,i.e. whether it can be translated or not
+	Scopable            bool              `json:"scopable" mapstructure:"scopable"`                             // whether the attribute is scopable or not,i.e. whether it can have different values depending on the channel or not
+	AvailableLocales    []string          `json:"available_locales" mapstructure:"available_locales"`           // the list of activated locales for the attribute values
+	Unique              bool              `json:"unique" mapstructure:"unique"`                                 // whether the attribute value is unique or not
+	UseableAsGridFilter bool              `json:"useable_as_grid_filter" mapstructure:"useable_as_grid_filter"` // whether the attribute can be used as a filter in the product grid or not
+	MaxCharacters       int               `json:"max_characters" mapstructure:"max_characters"`                 // the maximum number of characters allowed for the value of the attribute
+	ValidationRule      string            `json:"validation_rule" mapstructure:"validation_rule"`               // validation rule code to validate the attribute value
+	ValidationRegexp    string            `json:"validation_regexp" mapstructure:"validation_regexp"`           // validation regexp to validate the attribute value
+	WysiwygEnabled      bool              `json:"wysiwyg_enabled" mapstructure:"wysiwyg_enabled"`               // whether the attribute can have a value per channel or not
+	NumberMin           string            `json:"number_min" mapstructure:"number_min"`                         // the minimum value allowed for the value of the attribute
+	NumberMax           string            `json:"number_max" mapstructure:"number_max"`                         // the maximum value allowed for the value of the attribute
+	DecimalsAllowed     bool              `json:"decimals_allowed" mapstructure:"decimals_allowed"`             // whether decimals are allowed for the attribute or not
+	NegativeAllowed     bool              `json:"negative_allowed" mapstructure:"negative_allowed"`             // whether negative numbers are allowed for the attribute or not
+	MetricFamily        string            `json:"metric_family" mapstructure:"metric_family"`                   // the metric family of the attribute
+	DefaultMetricUnit   string            `json:"default_metric_unit" mapstructure:"default_metric_unit"`       // the default metric unit of the attribute
+	DateMin             string            `json:"date_min" mapstructure:"date_min"`                             // the minimum date allowed for the value of the attribute
+	DateMax             string            `json:"date_max" mapstructure:"date_max"`                             // the maximum date allowed for the value of the attribute
+	AllowedExtensions   []string          `json:"allowed_extensions" mapstructure:"allowed_extensions"`         // the list of allowed extensions for the value of the attribute
+	MaxFileSize         string            `json:"max_file_size" mapstructure:"max_file_size"`                   // the maximum file size allowed for the value of the attribute
+	ReferenceDataName   string            `json:"reference_data_name" mapstructure:"reference_data_name"`       // the reference data name of the attribute
+	DefaultValue        bool              `json:"default_value" mapstructure:"default_value"`                   // the default value of the attribute
+	TableConfiguration  []string          `json:"table_configuration" mapstructure:"table_configuration"`       // the table configuration of the attribute
+}
+
+// AttributeOption is the struct for a akeneo attribute option,see:
+type AttributeOption struct {
+	Links     Links             `json:"_links" mapstructure:"_links"`
+	Code      string            `json:"code" mapstructure:"code"`
+	Attribute string            `json:"attribute" mapstructure:"attribute"`
+	SortOrder int               `json:"sort_order" mapstructure:"sort_order"`
+	Labels    map[string]string `json:"labels" mapstructure:"labels"`
+}

@@ -69,10 +69,10 @@ func (p *productOp) ListWithPagination(options any) ([]Product, Links, error) {
 
 // GetProduct gets a product by its identifier
 func (p *productOp) GetProduct(id string, options any) (*Product, error) {
-	path := path.Join(productBasePath, id)
+	sourcePath := path.Join(productBasePath, id)
 	product := new(Product)
 	if err := p.client.GET(
-		path,
+		sourcePath,
 		options,
 		nil,
 		product,

@@ -1,6 +1,8 @@
 package goakeneo
 
-import "fmt"
+import (
+	"path"
+)
 
 const (
 	familyBasePath = "/api/rest/v1/families"
@@ -35,10 +37,10 @@ func (f *familyOp) ListWithPagination(options any) ([]Family, Links, error) {
 
 // GetFamily gets a family by code
 func (f *familyOp) GetFamily(familyCode string) (*Family, error) {
-	path := fmt.Sprintf("%s/%s", familyBasePath, familyCode)
+	sourcePath := path.Join(familyBasePath, familyCode)
 	family := new(Family)
 	if err := f.client.GET(
-		path,
+		sourcePath,
 		nil,
 		nil,
 		family,
@@ -50,10 +52,10 @@ func (f *familyOp) GetFamily(familyCode string) (*Family, error) {
 
 // GetFamilyVariants gets a family variants by code
 func (f *familyOp) GetFamilyVariants(familyCode string) ([]FamilyVariant, error) {
-	path := fmt.Sprintf("%s/%s/variants", familyBasePath, familyCode)
+	sourcePath := path.Join(familyBasePath, familyCode, "variants")
 	result := new(familyVariantsResponse)
 	if err := f.client.GET(
-		path,
+		sourcePath,
 		nil,
 		nil,
 		result,
@@ -65,10 +67,10 @@ func (f *familyOp) GetFamilyVariants(familyCode string) ([]FamilyVariant, error)
 
 // GetFamilyVariant gets a family variant by code
 func (f *familyOp) GetFamilyVariant(familyCode string, familyVariantCode string) (*FamilyVariant, error) {
-	path := fmt.Sprintf("%s/%s/variants/%s", familyBasePath, familyCode, familyVariantCode)
+	sourcePath := path.Join(familyBasePath, familyCode, "variants", familyVariantCode)
 	result := new(FamilyVariant)
 	if err := f.client.GET(
-		path,
+		sourcePath,
 		nil,
 		nil,
 		result,
