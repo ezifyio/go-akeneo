@@ -327,3 +327,24 @@ type AttributeOption struct {
 	SortOrder int               `json:"sort_order" mapstructure:"sort_order"`
 	Labels    map[string]string `json:"labels" mapstructure:"labels"`
 }
+
+// Category is the struct for a akeneo category
+type Category struct {
+	Links    Links                    `json:"_links" mapstructure:"_links"`
+	Code     string                   `json:"code" mapstructure:"code"`
+	Parent   string                   `json:"parent" mapstructure:"parent"`
+	Updated  string                   `json:"updated" mapstructure:"updated"`
+	Position int                      `json:"position" mapstructure:"position"` // since 7.0 with query parameter "with_positions=true"
+	Labels   map[string]string        `json:"labels" mapstructure:"labels"`
+	Values   map[string]categoryValue `json:"values" mapstructure:"values"`
+}
+
+// categoryValue is the struct for a akeneo category value
+// todo : Data field is not yet implemented well
+type categoryValue struct {
+	Data          any    `json:"data" mapstructure:"data"`           //  AttributeValue
+	Type          string `json:"type" mapstructure:"type"`           //  AttributeType
+	Locale        string `json:"locale" mapstructure:"locale"`       //  AttributeLocale
+	Channel       string `json:"channel" mapstructure:"channel"`     //  AttributeChannel
+	AttributeCode string `json:"attribute" mapstructure:"attribute"` //  AttributeCode with uuid, i.e. "description|96b88bf4-c2b7-4b64-a1f9-5d4876c02c26"
+}
