@@ -359,3 +359,10 @@ type Channel struct {
 	ConversionUnits map[string]string `json:"conversion_units" mapstructure:"conversion_units"`
 	Labels          map[string]string `json:"labels" mapstructure:"labels"`
 }
+
+// Locale is the struct for an akeneo locale
+type Locale struct {
+	Links   Links  `json:"_links" mapstructure:"_links"`
+	Code    string `json:"code" mapstructure:"code"`
+	Enabled bool   `json:"enabled" mapstructure:"enabled"`
+}
