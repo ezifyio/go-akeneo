@@ -26,6 +26,7 @@ type Client struct {
 	Family       FamilyService
 	Attribute    AttributeService
 	Category     CategoryService
+	Channel      ChannelService
 }
 
 func (c *Client) init() error {
@@ -78,6 +79,7 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	c.Family = &familyOp{c}
 	c.Attribute = &attributeOp{c}
 	c.Category = &categoryOp{c}
+	c.Channel = &channelOp{c}
 	if err := c.init(); err != nil {
 		return nil, err
 	}

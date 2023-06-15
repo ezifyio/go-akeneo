@@ -18,7 +18,7 @@ const (
 	ValueTypeTable            = "table"
 )
 
-// Product is the struct for a akeneo product
+// Product is the struct for an akeneo product
 type Product struct {
 	Links                  Links                            `json:"_links,omitempty" mapstructure:"_links"`
 	UUID                   string                           `json:"uuid,omitempty" mapstructure:"uuid"` // Since Akeneo 7.0
@@ -61,18 +61,18 @@ func (l Links) NextOptions() url.Values {
 	return u.Query()
 }
 
-// Link is the struct for a akeneo link
+// Link is the struct for an akeneo link
 type Link struct {
 	Href string `json:"href,omitempty"`
 }
 
-// ProductValue is the interface for a akeneo product value
+// ProductValue is the interface for an akeneo product value
 // see: https://api.akeneo.com/concepts/products.html#the-data-format
 type ProductValue interface {
 	ValueType() string
 }
 
-// StringValue is the struct for a akeneo text type product value
+// StringValue is the struct for an akeneo text type product value
 // pim_catalog_text or pim_catalog_textarea : data is a string
 // pim_catalog_file or pim_catalog_image: data is the file path
 // pim_catalog_date : data is a string in ISO-8601 format
@@ -87,7 +87,7 @@ func (StringValue) ValueType() string {
 	return ValueTypeString
 }
 
-// StringCollectionValue is the struct for a akeneo collection type product value
+// StringCollectionValue is the struct for an akeneo collection type product value
 type StringCollectionValue struct {
 	Locale string   `json:"locale,omitempty" mapstructure:"locale"`
 	Scope  string   `json:"scope,omitempty" mapstructure:"scope"`
@@ -99,8 +99,8 @@ func (StringCollectionValue) ValueType() string {
 	return ValueTypeStringCollection
 }
 
-// NumberValue is the struct for a akeneo number type product value
-// pim_catalog_number : data is a int when decimal is false ,float64 string when decimal is true
+// NumberValue is the struct for an akeneo number type product value
+// pim_catalog_number : data is an int when decimal is false ,float64 string when decimal is true
 // so the data will be parsed as ValueTypeString when decimal is true
 type NumberValue struct {
 	Locale string `json:"locale,omitempty" mapstructure:"locale"`
@@ -113,7 +113,7 @@ func (NumberValue) ValueType() string {
 	return ValueTypeNumber
 }
 
-// MetricValue is the struct for a akeneo metric type product value
+// MetricValue is the struct for an akeneo metric type product value
 // pim_catalog_metric : data amount is a float64 string when decimal is true, int when decimal is false
 type MetricValue struct {
 	Locale string `json:"locale,omitempty" mapstructure:"locale"`
@@ -143,7 +143,7 @@ func (v MetricValue) Amount() string {
 	return strconv.Itoa(i)
 }
 
-// PriceValue is the struct for a akeneo price type product value
+// PriceValue is the struct for an akeneo price type product value
 // pim_catalog_price : data amount is a float64 string when decimal is true, int when decimal is false
 type PriceValue struct {
 	Locale string `json:"locale,omitempty" mapstructure:"locale"`
@@ -173,7 +173,7 @@ func (v PriceValue) Amount() string {
 	return strconv.Itoa(i)
 }
 
-// BooleanValue is the struct for a akeneo boolean type product value
+// BooleanValue is the struct for an akeneo boolean type product value
 // pim_catalog_boolean : data is a bool
 type BooleanValue struct {
 	Locale string `json:"locale,omitempty" mapstructure:"locale"`
@@ -192,7 +192,7 @@ type linkedData struct {
 	Labels    map[string]string `json:"labels,omitempty" mapstructure:"labels"`
 }
 
-// SimpleSelectValue is the struct for a akeneo simple select type product value
+// SimpleSelectValue is the struct for an akeneo simple select type product value
 type SimpleSelectValue struct {
 	Locale     string     `json:"locale,omitempty" mapstructure:"locale"`
 	Scope      string     `json:"scope,omitempty" mapstructure:"scope"`
@@ -205,7 +205,7 @@ func (SimpleSelectValue) ValueType() string {
 	return ValueTypeSimpleSelect
 }
 
-// MultiSelectValue is the struct for a akeneo multi select type product value
+// MultiSelectValue is the struct for an akeneo multi select type product value
 type MultiSelectValue struct {
 	Locale     string                `json:"locale,omitempty" mapstructure:"locale"`
 	Scope      string                `json:"scope,omitempty" mapstructure:"scope"`
@@ -218,7 +218,7 @@ func (MultiSelectValue) ValueType() string {
 	return ValueTypeMultiSelect
 }
 
-// TableValue is the struct for a akeneo table type product value
+// TableValue is the struct for an akeneo table type product value
 // pim_catalog_table : data is a []map[string]any
 type TableValue struct {
 	Locale string `json:"locale,omitempty" mapstructure:"locale"`
@@ -237,7 +237,7 @@ type association struct {
 	ProductModels []string `json:"product_models" mapstructure:"product_models"`
 }
 
-// QuantifiedAssociations is the struct for a akeneo quantified associations
+// QuantifiedAssociations is the struct for an akeneo quantified associations
 type quantifiedAssociation struct {
 	Products      []productQuantity      `json:"products" mapstructure:"products"`
 	ProductModels []productModelQuantity `json:"product_models" mapstructure:"product_models"`
@@ -260,7 +260,7 @@ type QualityScore struct {
 	Data   string `json:"data,omitempty" validate:"required"`
 }
 
-// Family is the struct for a akeneo family
+// Family is the struct for an akeneo family
 type Family struct {
 	Links                 Links               `json:"_links,omitempty" mapstructure:"_links"`
 	Code                  string              `json:"code,omitempty" mapstructure:"code"`                                     // The code of the family
@@ -271,7 +271,7 @@ type Family struct {
 	Labels                map[string]string   `json:"labels,omitempty" mapstructure:"labels"`                                 //  Translatable labels. Ex: {"en_US": "T-shirt", "fr_FR": "T-shirt"}
 }
 
-// FamilyVariant is the struct for a akeneo family variant
+// FamilyVariant is the struct for an akeneo family variant
 type FamilyVariant struct {
 	Links                Links                 `json:"_links,omitempty" mapstructure:"_links"`
 	Code                 string                `json:"code,omitempty" mapstructure:"code"`                                     // The code of the family variant
@@ -285,7 +285,7 @@ type variantAttributeSet struct {
 	Attributes []string `json:"attributes,omitempty" mapstructure:"attributes"` // The attributes of the variant attribute set
 }
 
-// Attribute is the struct for a akeneo attribute,see:
+// Attribute is the struct for an akeneo attribute,see:
 // https://api.akeneo.com/api-reference.html#Attribute
 type Attribute struct {
 	Links               Links             `json:"_links" mapstructure:"_links"`
@@ -319,7 +319,7 @@ type Attribute struct {
 	TableConfiguration  []string          `json:"table_configuration" mapstructure:"table_configuration"`       // the table configuration of the attribute
 }
 
-// AttributeOption is the struct for a akeneo attribute option,see:
+// AttributeOption is the struct for an akeneo attribute option,see:
 type AttributeOption struct {
 	Links     Links             `json:"_links" mapstructure:"_links"`
 	Code      string            `json:"code" mapstructure:"code"`
@@ -328,7 +328,7 @@ type AttributeOption struct {
 	Labels    map[string]string `json:"labels" mapstructure:"labels"`
 }
 
-// Category is the struct for a akeneo category
+// Category is the struct for an akeneo category
 type Category struct {
 	Links    Links                    `json:"_links" mapstructure:"_links"`
 	Code     string                   `json:"code" mapstructure:"code"`
@@ -339,7 +339,7 @@ type Category struct {
 	Values   map[string]categoryValue `json:"values" mapstructure:"values"`
 }
 
-// categoryValue is the struct for a akeneo category value
+// categoryValue is the struct for an akeneo category value
 // todo : Data field is not yet implemented well
 type categoryValue struct {
 	Data          any    `json:"data" mapstructure:"data"`           //  AttributeValue
@@ -347,4 +347,15 @@ type categoryValue struct {
 	Locale        string `json:"locale" mapstructure:"locale"`       //  AttributeLocale
 	Channel       string `json:"channel" mapstructure:"channel"`     //  AttributeChannel
 	AttributeCode string `json:"attribute" mapstructure:"attribute"` //  AttributeCode with uuid, i.e. "description|96b88bf4-c2b7-4b64-a1f9-5d4876c02c26"
+}
+
+// Channel is the struct for an akeneo channel
+type Channel struct {
+	Links           Links             `json:"_links" mapstructure:"_links"`
+	Code            string            `json:"code" mapstructure:"code"`
+	Currencies      []string          `json:"currencies" mapstructure:"currencies"`
+	Locales         []string          `json:"locales" mapstructure:"locales"`
+	CategoryTree    string            `json:"category_tree" mapstructure:"category_tree"`
+	ConversionUnits map[string]string `json:"conversion_units" mapstructure:"conversion_units"`
+	Labels          map[string]string `json:"labels" mapstructure:"labels"`
 }
