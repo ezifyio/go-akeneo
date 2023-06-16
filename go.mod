@@ -1,4 +1,4 @@
-module github.com/ezifyio/go-akeneo/v2
+module github.com/ezifyio/go-akeneo
 
 go 1.20
 
