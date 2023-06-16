@@ -3,12 +3,15 @@ package goakeneo
 import "time"
 
 const (
-	defaultHTTPTimeout = 10 * time.Second
-	defaultAccept      = "application/json"
-	defaultContentType = "application/json"
-	defaultUserAgent   = "go-akeneo v1.0.0"
-	defaultRateLimit   = 5 // 5 requests per second
-	defaultVersion     = AkeneoPimVersion6
+	defaultHTTPTimeout      = 10 * time.Second
+	defaultAccept           = "application/json"
+	defaultContentType      = "application/json"
+	defaultUserAgent        = "go-akeneo v1.0.0"
+	defaultRateLimit        = 5 // 5 requests per second
+	defaultVersion          = AkeneoPimVersion6
+	defaultRetry            = 2
+	defaultRetryWaitTime    = 3 * time.Second
+	defaultRetryMaxWaitTime = 30 * time.Second
 )
 
 const (

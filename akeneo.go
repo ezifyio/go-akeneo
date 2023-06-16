@@ -33,6 +33,7 @@ type Client struct {
 	refreshToken string            // refreshToken is the refresh token
 	tokenExp     time.Time         // tokenExp is the token expiration time,5 minutes before the actual expiration
 	osVersion    int               // osVersion is the version of the OS
+	retryCNT     int               // retryCNT is the retry count
 	limiter      ratelimit.Limiter // limiter, default 5 requests per second
 	Auth         AuthService
 	Product      ProductService
@@ -42,6 +43,7 @@ type Client struct {
 	Channel      ChannelService
 	Locale       LocaleService
 	Media        MediaFileService
+	ProductModel ProductModelService
 }
 
 func (c *Client) validate() error {
@@ -87,6 +89,7 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 		},
 		connector: con,
 		osVersion: defaultVersion,
+		retryCNT:  defaultRetry,
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -103,6 +106,7 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	c.Channel = &channelOp{c}
 	c.Locale = &localeOp{c}
 	c.Media = &mediaOp{c}
+	c.ProductModel = &productModelOp{c}
 	if err := c.init(); err != nil {
 		return nil, err
 	}
@@ -133,20 +137,34 @@ func WithVersion(v int) Option {
 	}
 }
 
-// createAndDo create a request and get the headers
-func (c *Client) createAndDo(method, relPath string, opts, data, result any) error {
+// WithRetry sets the retry count of the Akeneo API
+func WithRetry(cnt int) Option {
+	return func(c *Client) {
+		c.retryCNT = cnt
+	}
+}
+
+// createAndDoGetHeaders create a request and get the headers
+func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, result any) (http.Header, error) {
 	if err := c.Auth.AutoRefreshToken(); err != nil {
-		return err
+		return http.Header{}, err
 	}
 	rel, err := url.Parse(relPath)
 	if err != nil {
-		return err
+		return http.Header{}, err
 	}
 	// Make the full url based on the relative path
 	u := c.baseURL.ResolveReference(rel)
 
 	var errResp ErrorResponse
-	request := resty.NewWithClient(c.httpClient).R().
+	client := resty.NewWithClient(c.httpClient).
+		SetRetryCount(c.retryCNT).
+		SetRetryWaitTime(defaultRetryWaitTime).
+		SetRetryMaxWaitTime(defaultRetryMaxWaitTime).
+		AddRetryCondition(func(r *resty.Response, err error) bool {
+			return r.StatusCode() == http.StatusTooManyRequests
+		})
+	request := client.R().
 		SetHeader("Content-Type", defaultContentType).
 		SetHeader("Accept", defaultAccept).
 		SetHeader("User-Agent", defaultUserAgent).
@@ -162,11 +180,11 @@ func (c *Client) createAndDo(method, relPath string, opts, data, result any) err
 			if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct || t.Kind() == reflect.Struct {
 				v, err := structToURLValues(opts)
 				if err != nil {
-					return errors.Wrap(err, "unable to convert struct to url values")
+					return http.Header{}, errors.Wrap(err, "unable to convert struct to url values")
 				}
 				request.SetQueryParamsFromValues(v)
 			} else {
-				return errors.New("opts must be a struct or a pointer to a struct or a url.Values")
+				return http.Header{}, errors.New("opts must be a struct or a pointer to a struct or a url.Values")
 			}
 		}
 	}
@@ -177,19 +195,19 @@ func (c *Client) createAndDo(method, relPath string, opts, data, result any) err
 	c.limiter.Take()
 	resp, err := request.Execute(method, u.String())
 	if err != nil {
-		return errors.Wrap(err, "resty execute error")
+		return http.Header{}, errors.Wrap(err, "resty execute error")
 	}
 	// see : https://api.akeneo.com/documentation/responses.html
 	if resp.IsError() {
-		return errors.Errorf("request error : %s", errResp.Message)
+		return http.Header{}, errors.Errorf("request error : %s", errResp.Message)
 	}
-	return nil
+	return resp.Header(), nil
 }
 
 // GET creates a get request and execute it
 // result must be a pointer to a struct
 func (c *Client) GET(relPath string, ops, data, result any) error {
-	err := c.createAndDo(http.MethodGet, relPath, ops, data, result)
+	_, err := c.createAndDoGetHeaders(http.MethodGet, relPath, ops, data, result)
 	if err != nil {
 		return errors.Wrap(err, "create and do error")
 	}
@@ -199,7 +217,7 @@ func (c *Client) GET(relPath string, ops, data, result any) error {
 // POST creates a post request and execute it
 // result must be a pointer to a struct
 func (c *Client) POST(relPath string, ops, data, result any) error {
-	err := c.createAndDo(http.MethodPost, relPath, ops, data, result)
+	_, err := c.createAndDoGetHeaders(http.MethodPost, relPath, ops, data, result)
 	if err != nil {
 		return errors.Wrap(err, "create and do error")
 	}
