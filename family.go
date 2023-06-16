@@ -23,7 +23,7 @@ type familyOp struct {
 
 // ListWithPagination lists families with pagination
 func (f *familyOp) ListWithPagination(options any) ([]Family, Links, error) {
-	familyResponse := new(familiesResponse)
+	familyResponse := new(FamiliesResponse)
 	if err := f.client.GET(
 		familyBasePath,
 		options,
@@ -55,7 +55,7 @@ func (f *familyOp) GetFamily(familyCode string, options any) (*Family, error) {
 // GetFamilyVariants gets a family variants by code
 func (f *familyOp) GetFamilyVariants(familyCode string, options any) ([]FamilyVariant, error) {
 	sourcePath := path.Join(familyBasePath, familyCode, "variants")
-	result := new(familyVariantsResponse)
+	result := new(FamilyVariantsResponse)
 	if err := f.client.GET(
 		sourcePath,
 		options,
@@ -82,8 +82,8 @@ func (f *familyOp) GetFamilyVariant(familyCode string, familyVariantCode string)
 	return result, nil
 }
 
-// familiesResponse is the struct for a akeneo families response
-type familiesResponse struct {
+// FamiliesResponse is the struct for a akeneo families response
+type FamiliesResponse struct {
 	Links       Links       `json:"_links" mapstructure:"_links"`
 	CurrentPage int         `json:"current_page" mapstructure:"current_page"`
 	Embedded    familyItems `json:"_embedded" mapstructure:"_embedded"`
@@ -93,8 +93,8 @@ type familyItems struct {
 	Items []Family `json:"items" mapstructure:"items"`
 }
 
-// familyVariantsResponse is the struct for a akeneo family variants response
-type familyVariantsResponse struct {
+// FamilyVariantsResponse is the struct for a akeneo family variants response
+type FamilyVariantsResponse struct {
 	Links       Links              `json:"_links" mapstructure:"_links"`
 	CurrentPage int                `json:"current_page" mapstructure:"current_page"`
 	Embedded    familyVariantItems `json:"_embedded" mapstructure:"_embedded"`

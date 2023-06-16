@@ -15,7 +15,7 @@ type categoryOp struct {
 
 // ListWithPagination lists categories with pagination
 func (c *categoryOp) ListWithPagination(options any) ([]Category, Links, error) {
-	categoryResponse := new(categoriesResponse)
+	categoryResponse := new(CategoriesResponse)
 	if err := c.client.GET(
 		categoryBasePath,
 		options,
@@ -27,8 +27,8 @@ func (c *categoryOp) ListWithPagination(options any) ([]Category, Links, error) 
 	return categoryResponse.Embedded.Items, categoryResponse.Links, nil
 }
 
-// categoriesResponse is the struct for a akeneo categories response
-type categoriesResponse struct {
+// CategoriesResponse is the struct for a akeneo categories response
+type CategoriesResponse struct {
 	Links       Links         `json:"_links,omitempty" mapstructure:"_links"`
 	CurrentPage int           `json:"current_page,omitempty" mapstructure:"current_page"`
 	Embedded    categoryItems `json:"_embedded,omitempty" mapstructure:"_embedded"`

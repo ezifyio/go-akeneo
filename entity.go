@@ -18,6 +18,11 @@ const (
 	ValueTypeTable            = "table"
 )
 
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 // Product is the struct for an akeneo product
 type Product struct {
 	Links                  Links                            `json:"_links,omitempty" mapstructure:"_links"`

@@ -13,7 +13,7 @@ type mediaOp struct {
 
 // ListPagination lists media files with pagination
 func (c *mediaOp) ListPagination(options any) ([]MediaFile, Links, error) {
-	mediaResponse := new(mediaFileResponse)
+	mediaResponse := new(MediaFileResponse)
 	if err := c.client.GET(
 		mediaBasePath,
 		options,
@@ -25,7 +25,7 @@ func (c *mediaOp) ListPagination(options any) ([]MediaFile, Links, error) {
 	return mediaResponse.Embedded.Items, mediaResponse.Links, nil
 }
 
-type mediaFileResponse struct {
+type MediaFileResponse struct {
 	Links       Links      `json:"_links,omitempty" mapstructure:"_links"`
 	CurrentPage int        `json:"current_page,omitempty" mapstructure:"current_page"`
 	Embedded    mediaItems `json:"_embedded,omitempty" mapstructure:"_embedded"`

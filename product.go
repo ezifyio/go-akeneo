@@ -67,7 +67,7 @@ func (p *productOp) ListWithPagination(options any) ([]Product, Links, error) {
 	if p.client.osVersion >= AkeneoPimVersion7 {
 		basePath = productUUIDBasePath
 	}
-	productResponse := new(productsResponse)
+	productResponse := new(ProductsResponse)
 	if err := p.client.GET(
 		basePath,
 		options,
@@ -99,8 +99,8 @@ func (p *productOp) GetProduct(id string, options any) (*Product, error) {
 	return product, nil
 }
 
-// productsResponse is the struct for a akeneo products response
-type productsResponse struct {
+// ProductsResponse is the struct for a akeneo products response
+type ProductsResponse struct {
 	Links       Links        `json:"_links" mapstructure:"_links"`
 	CurrentPage int          `json:"current_page" mapstructure:"current_page"`
 	Embedded    productItems `json:"_embedded" mapstructure:"_embedded"`

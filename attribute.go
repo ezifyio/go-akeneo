@@ -22,7 +22,7 @@ type attributeOp struct {
 
 // ListWithPagination lists attributes with pagination
 func (c *attributeOp) ListWithPagination(options any) ([]Attribute, Links, error) {
-	attributeResponse := new(attributesResponse)
+	attributeResponse := new(AttributesResponse)
 	if err := c.client.GET(
 		attributeBasePath,
 		options,
@@ -52,7 +52,7 @@ func (c *attributeOp) GetAttribute(code string, options any) (*Attribute, error)
 // GetAttributeOptions gets an attribute's options by code
 func (c *attributeOp) GetAttributeOptions(code string, options any) ([]AttributeOption, Links, error) {
 	sourcePath := path.Join(attributeBasePath, code, "options")
-	attributeOptionsResponse := new(attributeOptionsResponse)
+	attributeOptionsResponse := new(AttributeOptionsResponse)
 	if err := c.client.GET(
 		sourcePath,
 		options,
@@ -64,8 +64,8 @@ func (c *attributeOp) GetAttributeOptions(code string, options any) ([]Attribute
 	return attributeOptionsResponse.Embedded.Items, attributeOptionsResponse.Links, nil
 }
 
-// attributesResponse is the struct for a akeneo attributes response
-type attributesResponse struct {
+// AttributesResponse is the struct for a akeneo attributes response
+type AttributesResponse struct {
 	Links       Links          `json:"_links" mapstructure:"_links"`
 	CurrentPage int            `json:"current_page" mapstructure:"current_page"`
 	Embedded    attributeItems `json:"_embedded" mapstructure:"_embedded"`
@@ -75,8 +75,8 @@ type attributeItems struct {
 	Items []Attribute `json:"items" mapstructure:"items"`
 }
 
-// attributeOptionsResponse is the struct for a akeneo attribute options response
-type attributeOptionsResponse struct {
+// AttributeOptionsResponse is the struct for a akeneo attribute options response
+type AttributeOptionsResponse struct {
 	Links       Links                `json:"_links" mapstructure:"_links"`
 	CurrentPage int                  `json:"current_page" mapstructure:"current_page"`
 	Embedded    attributeOptionItems `json:"_embedded" mapstructure:"_embedded"`

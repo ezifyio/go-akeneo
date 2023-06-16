@@ -11,7 +11,7 @@ import (
 	"go.uber.org/ratelimit"
 )
 
-// Connector is the struct to use to interact with the Akeneo API
+// Connector is the struct to use to store the Akeneo connection information
 type Connector struct {
 	ClientID string `json:"client_id" mapstructure:"client_id"`
 	Secret   string `json:"secret" mapstructure:"secret"`
@@ -133,24 +133,26 @@ func WithVersion(v int) Option {
 	}
 }
 
-// createAndDoGetHeaders create a request and get the headers
-func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, result any) (http.Header, error) {
+// createAndDo create a request and get the headers
+func (c *Client) createAndDo(method, relPath string, opts, data, result any) error {
 	if err := c.Auth.AutoRefreshToken(); err != nil {
-		return nil, err
+		return err
 	}
 	rel, err := url.Parse(relPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// Make the full url based on the relative path
 	u := c.baseURL.ResolveReference(rel)
 
+	var errResp ErrorResponse
 	request := resty.NewWithClient(c.httpClient).R().
 		SetHeader("Content-Type", defaultContentType).
 		SetHeader("Accept", defaultAccept).
 		SetHeader("User-Agent", defaultUserAgent).
 		SetAuthToken(c.token).
-		SetResult(result)
+		SetResult(result).
+		SetError(&errResp)
 	if opts != nil {
 		if v, ok := opts.(url.Values); ok {
 			request.SetQueryParamsFromValues(v)
@@ -160,11 +162,11 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 			if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct || t.Kind() == reflect.Struct {
 				v, err := structToURLValues(opts)
 				if err != nil {
-					return nil, errors.Wrap(err, "unable to convert struct to url values")
+					return errors.Wrap(err, "unable to convert struct to url values")
 				}
 				request.SetQueryParamsFromValues(v)
 			} else {
-				return nil, errors.New("opts must be a struct or a pointer to a struct or a url.Values")
+				return errors.New("opts must be a struct or a pointer to a struct or a url.Values")
 			}
 		}
 	}
@@ -175,15 +177,19 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 	c.limiter.Take()
 	resp, err := request.Execute(method, u.String())
 	if err != nil {
-		return nil, errors.Wrap(err, "resty execute error")
+		return errors.Wrap(err, "resty execute error")
 	}
-	// todo: check status code
-	return resp.Header(), nil
+	// see : https://api.akeneo.com/documentation/responses.html
+	if resp.IsError() {
+		return errors.Errorf("request error : %s", errResp.Message)
+	}
+	return nil
 }
 
 // GET creates a get request and execute it
+// result must be a pointer to a struct
 func (c *Client) GET(relPath string, ops, data, result any) error {
-	_, err := c.createAndDoGetHeaders(http.MethodGet, relPath, ops, data, result)
+	err := c.createAndDo(http.MethodGet, relPath, ops, data, result)
 	if err != nil {
 		return errors.Wrap(err, "create and do get headers error")
 	}
@@ -191,8 +197,9 @@ func (c *Client) GET(relPath string, ops, data, result any) error {
 }
 
 // POST creates a post request and execute it
+// result must be a pointer to a struct
 func (c *Client) POST(relPath string, ops, data, result any) error {
-	_, err := c.createAndDoGetHeaders(http.MethodPost, relPath, ops, data, result)
+	err := c.createAndDo(http.MethodPost, relPath, ops, data, result)
 	if err != nil {
 		return errors.Wrap(err, "create and do get headers error")
 	}
