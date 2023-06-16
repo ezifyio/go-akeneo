@@ -1,12 +1,12 @@
 package goakeneo
 
 import (
+	"github.com/go-resty/resty/v2"
 	"net/http"
 	"net/url"
 	"reflect"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/ratelimit"
 )
