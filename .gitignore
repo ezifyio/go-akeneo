@@ -14,6 +14,9 @@
 # Local settings
 .idea
 
+# Local Test files
+testcase/
+
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 

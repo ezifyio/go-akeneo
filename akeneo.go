@@ -191,7 +191,7 @@ func (c *Client) createAndDo(method, relPath string, opts, data, result any) err
 func (c *Client) GET(relPath string, ops, data, result any) error {
 	err := c.createAndDo(http.MethodGet, relPath, ops, data, result)
 	if err != nil {
-		return errors.Wrap(err, "create and do get headers error")
+		return errors.Wrap(err, "create and do error")
 	}
 	return nil
 }
@@ -201,7 +201,7 @@ func (c *Client) GET(relPath string, ops, data, result any) error {
 func (c *Client) POST(relPath string, ops, data, result any) error {
 	err := c.createAndDo(http.MethodPost, relPath, ops, data, result)
 	if err != nil {
-		return errors.Wrap(err, "create and do get headers error")
+		return errors.Wrap(err, "create and do error")
 	}
 	return nil
 }

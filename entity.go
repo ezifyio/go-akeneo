@@ -1,22 +1,38 @@
 package goakeneo
 
 import (
+	"fmt"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"net/url"
 	"strconv"
 )
 
 // ValueTypeConst
 const (
-	ValueTypeString           = "string"
-	ValueTypeStringCollection = "string_collection"
-	ValueTypeNumber           = "number"
-	ValueTypeMetric           = "metric"
-	ValueTypePrice            = "price"
-	ValueTypeBoolean          = "boolean"
-	ValueTypeSimpleSelect     = "simple_select"
-	ValueTypeMultiSelect      = "multi_select"
-	ValueTypeTable            = "table"
+	ValueTypeString = iota + 1
+	ValueTypeStringCollection
+	ValueTypeNumber
+	ValueTypeMetric
+	ValueTypePrice
+	ValueTypeBoolean
+	ValueTypeSimpleSelect
+	ValueTypeMultiSelect
+	ValueTypeTable
 )
+
+// ValueTypeName is the name of the value type
+var ValueTypeName = map[int]string{
+	ValueTypeString:           "string",
+	ValueTypeStringCollection: "string_collection",
+	ValueTypeNumber:           "number",
+	ValueTypeMetric:           "metric",
+	ValueTypePrice:            "price",
+	ValueTypeBoolean:          "boolean",
+	ValueTypeSimpleSelect:     "simple_select",
+	ValueTypeMultiSelect:      "multi_select",
+	ValueTypeTable:            "table",
+}
 
 type ErrorResponse struct {
 	Code    int    `json:"code"`
@@ -71,10 +87,126 @@ type Link struct {
 	Href string `json:"href,omitempty"`
 }
 
-// ProductValue is the interface for an akeneo product value
-// see: https://api.akeneo.com/concepts/products.html#the-data-format
-type ProductValue interface {
-	ValueType() string
+type ProductValue struct {
+	Locale     string `json:"locale,omitempty" mapstructure:"locale"`
+	Scope      string `json:"scope,omitempty" mapstructure:"scope"`
+	Data       any    `json:"data,omitempty" mapstructure:"data"`
+	LinkedData any    `json:"linked_data,omitempty" mapstructure:"linked_data"`
+}
+
+type PimProductValue interface {
+	ValueType() int
+}
+
+// ParseValue tries to parse the value to correct type
+func (v ProductValue) ParseValue() (PimProductValue, error) {
+	// if v.Data != nil-> simple select, multi select
+	if v.LinkedData != nil {
+		switch v.Data.(type) {
+		case string:
+			result := SimpleSelectValue{
+				Locale: v.Locale,
+				Scope:  v.Scope,
+				Data:   v.Data.(string),
+			}
+			ld, ok := v.LinkedData.(map[string]interface{})
+			if !ok {
+				return nil, errors.New("invalid linked data")
+			}
+			if err := mapstructure.Decode(ld, &result.LinkedData); err != nil {
+				return nil, err
+			}
+			return result, nil
+		case []string:
+			result := MultiSelectValue{
+				Locale: v.Locale,
+				Scope:  v.Scope,
+				Data:   v.Data.([]string),
+			}
+			ld, ok := v.LinkedData.(map[string]interface{})
+			if !ok {
+				return nil, errors.New("invalid linked data")
+			}
+			if err := mapstructure.Decode(ld, &result.LinkedData); err != nil {
+				return nil, err
+			}
+			return result, nil
+		default:
+			return nil, fmt.Errorf("unknown linked data type %T", v.LinkedData)
+		}
+	}
+	switch v.Data.(type) {
+	case string:
+		return StringValue{
+			Locale: v.Locale,
+			Scope:  v.Scope,
+			Data:   v.Data.(string),
+		}, nil
+	case []string:
+		return StringCollectionValue{
+			Locale: v.Locale,
+			Scope:  v.Scope,
+			Data:   v.Data.([]string),
+		}, nil
+	case bool:
+		return BooleanValue{
+			Locale: v.Locale,
+			Scope:  v.Scope,
+			Data:   v.Data.(bool),
+		}, nil
+	case int:
+		return NumberValue{
+			Locale: v.Locale,
+			Scope:  v.Scope,
+			Data:   v.Data.(int),
+		}, nil
+	case map[string]interface{}:
+		d, _ := v.Data.(map[string]interface{})
+		if _, ok := d["unit"]; ok {
+			result := MetricValue{
+				Locale: v.Locale,
+				Scope:  v.Scope,
+				Data: metric{
+					Unit:   d["unit"].(string),
+					Amount: d["amount"],
+				},
+			}
+			return result, nil
+		}
+	case []interface{}:
+		sd, _ := v.Data.([]interface{})
+		d, ok := sd[0].(map[string]interface{})
+		if !ok {
+			return nil, errors.New("invalid data, should be a slice of map")
+		}
+		if _, ok := d["currency"]; ok {
+			result := PriceValue{
+				Locale: v.Locale,
+				Scope:  v.Scope,
+			}
+			for _, item := range sd {
+				pd, _ := item.(map[string]interface{})
+				result.Data = append(result.Data, price{
+					Currency: pd["currency"].(string),
+					Amount:   pd["amount"],
+				})
+			}
+			return result, nil
+		}
+		tableData := make([]map[string]any, len(sd))
+		for i, item := range sd {
+			d, _ := item.(map[string]interface{})
+			tableData[i] = d
+		}
+		result := TableValue{
+			Locale: v.Locale,
+			Scope:  v.Scope,
+			Data:   tableData,
+		}
+		return result, nil
+	default:
+	}
+	return nil, errors.New("unknown data type")
 }
 
 // StringValue is the struct for an akeneo text type product value
@@ -88,7 +220,7 @@ type StringValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (StringValue) ValueType() string {
+func (StringValue) ValueType() int {
 	return ValueTypeString
 }
 
@@ -100,7 +232,7 @@ type StringCollectionValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (StringCollectionValue) ValueType() string {
+func (StringCollectionValue) ValueType() int {
 	return ValueTypeStringCollection
 }
 
@@ -114,7 +246,7 @@ type NumberValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (NumberValue) ValueType() string {
+func (NumberValue) ValueType() int {
 	return ValueTypeNumber
 }
 
@@ -132,7 +264,7 @@ type metric struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (MetricValue) ValueType() string {
+func (MetricValue) ValueType() int {
 	return ValueTypeMetric
 }
 
@@ -148,12 +280,17 @@ func (v MetricValue) Amount() string {
 	return strconv.Itoa(i)
 }
 
+// Unit returns the unit as string
+func (v MetricValue) Unit() string {
+	return v.Data.Unit
+}
+
 // PriceValue is the struct for an akeneo price type product value
 // pim_catalog_price : data amount is a float64 string when decimal is true, int when decimal is false
 type PriceValue struct {
-	Locale string `json:"locale,omitempty" mapstructure:"locale"`
-	Scope  string `json:"scope,omitempty" mapstructure:"scope"`
-	Data   price  `json:"data,omitempty" mapstructure:"data"`
+	Locale string  `json:"locale,omitempty" mapstructure:"locale"`
+	Scope  string  `json:"scope,omitempty" mapstructure:"scope"`
+	Data   []price `json:"data,omitempty" mapstructure:"data"`
 }
 
 type price struct {
@@ -162,20 +299,25 @@ type price struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (PriceValue) ValueType() string {
+func (PriceValue) ValueType() int {
 	return ValueTypePrice
 }
 
 // Amount returns the amount as string
-func (v PriceValue) Amount() string {
-	if f, ok := v.Data.Amount.(string); ok {
-		return f
+func (v PriceValue) Amount(currency string) string {
+	for _, p := range v.Data {
+		if p.Currency == currency {
+			if f, ok := p.Amount.(string); ok {
+				return f
+			}
+			i, ok := p.Amount.(int)
+			if !ok {
+				return ""
+			}
+			return strconv.Itoa(i)
+		}
 	}
-	i, ok := v.Data.Amount.(int)
-	if !ok {
-		return ""
-	}
-	return strconv.Itoa(i)
+	return ""
 }
 
 // BooleanValue is the struct for an akeneo boolean type product value
@@ -187,7 +329,7 @@ type BooleanValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (BooleanValue) ValueType() string {
+func (BooleanValue) ValueType() int {
 	return ValueTypeBoolean
 }
 
@@ -206,7 +348,7 @@ type SimpleSelectValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (SimpleSelectValue) ValueType() string {
+func (SimpleSelectValue) ValueType() int {
 	return ValueTypeSimpleSelect
 }
 
@@ -219,7 +361,7 @@ type MultiSelectValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (MultiSelectValue) ValueType() string {
+func (MultiSelectValue) ValueType() int {
 	return ValueTypeMultiSelect
 }
 
@@ -232,7 +374,7 @@ type TableValue struct {
 }
 
 // ValueType returns the value type, see ValueTypeConst
-func (TableValue) ValueType() string {
+func (TableValue) ValueType() int {
 	return ValueTypeTable
 }
 
