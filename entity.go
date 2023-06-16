@@ -378,6 +378,34 @@ func (TableValue) ValueType() int {
 	return ValueTypeTable
 }
 
+// ProductModel is the struct for an akeneo product model
+type ProductModel struct {
+	Links                  Links                            `json:"_links,omitempty" mapstructure:"_links"`
+	Code                   string                           `json:"code,omitempty" mapstructure:"code"`
+	Family                 string                           `json:"family,omitempty" mapstructure:"family"`
+	FamilyVariant          string                           `json:"family_variant,omitempty" mapstructure:"family_variant"`
+	Parent                 string                           `json:"parent,omitempty" mapstructure:"parent"`
+	Categories             []string                         `json:"categories,omitempty" mapstructure:"categories"`
+	Values                 map[string][]ProductValue        `json:"values,omitempty" mapstructure:"values"`
+	Associations           map[string]association           `json:"associations,omitempty" mapstructure:"associations"`
+	QuantifiedAssociations map[string]quantifiedAssociation `json:"quantified_associations,omitempty" mapstructure:"quantified_associations"`
+	Metadata               map[string]string                `json:"metadata,omitempty" mapstructure:"metadata"`
+	Created                string                           `json:"created,omitempty" mapstructure:"created"`
+	Updated                string                           `json:"updated,omitempty" mapstructure:"updated"`
+	QulityScores           []QualityScore                   `json:"quality_scores,omitempty" mapstructure:"quality_scores"`
+}
+
+// validateBeforeCreate validates the product model before creating it
+func (p ProductModel) validateBeforeCreate() error {
+	if p.Code == "" {
+		return errors.New("code is required")
+	}
+	if p.FamilyVariant == "" {
+		return errors.New("family is required")
+	}
+	return nil
+}
+
 type association struct {
 	Groups        []string `json:"groups" mapstructure:"groups"`
 	Products      []string `json:"products" mapstructure:"products"`
