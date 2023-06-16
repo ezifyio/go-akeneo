@@ -12,8 +12,8 @@ const (
 // todo: query parameters check
 type FamilyService interface {
 	ListWithPagination(options any) ([]Family, Links, error)
-	GetFamily(familyCode string) (*Family, error)
-	GetFamilyVariants(familyCode string) ([]FamilyVariant, error)
+	GetFamily(familyCode string, options any) (*Family, error)
+	GetFamilyVariants(familyCode string, options any) ([]FamilyVariant, error)
 	GetFamilyVariant(familyCode string, familyVariantCode string) (*FamilyVariant, error)
 }
 
@@ -22,7 +22,6 @@ type familyOp struct {
 }
 
 // ListWithPagination lists families with pagination
-// options should be
 func (f *familyOp) ListWithPagination(options any) ([]Family, Links, error) {
 	familyResponse := new(familiesResponse)
 	if err := f.client.GET(
@@ -37,12 +36,14 @@ func (f *familyOp) ListWithPagination(options any) ([]Family, Links, error) {
 }
 
 // GetFamily gets a family by code
-func (f *familyOp) GetFamily(familyCode string) (*Family, error) {
+// do not use options for now
+// get family does not support options yet, but it may in the future
+func (f *familyOp) GetFamily(familyCode string, options any) (*Family, error) {
 	sourcePath := path.Join(familyBasePath, familyCode)
 	family := new(Family)
 	if err := f.client.GET(
 		sourcePath,
-		nil,
+		options,
 		nil,
 		family,
 	); err != nil {
@@ -52,12 +53,12 @@ func (f *familyOp) GetFamily(familyCode string) (*Family, error) {
 }
 
 // GetFamilyVariants gets a family variants by code
-func (f *familyOp) GetFamilyVariants(familyCode string) ([]FamilyVariant, error) {
+func (f *familyOp) GetFamilyVariants(familyCode string, options any) ([]FamilyVariant, error) {
 	sourcePath := path.Join(familyBasePath, familyCode, "variants")
 	result := new(familyVariantsResponse)
 	if err := f.client.GET(
 		sourcePath,
-		nil,
+		options,
 		nil,
 		result,
 	); err != nil {

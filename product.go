@@ -1,6 +1,7 @@
 package goakeneo
 
 import (
+	"context"
 	"path"
 
 	"github.com/pkg/errors"
@@ -8,12 +9,13 @@ import (
 
 const (
 	productBasePath = "/api/rest/v1/products"
-	// todo: product uuid path
+	// product uuid path since akeneo 7
+	productUUIDBasePath = "/api/rest/v1/products-uuid"
 )
 
 // ProductService is the interface to interact with the Akeneo Product API
 type ProductService interface {
-	GetAllProducts(options any) (<-chan Product, chan error)
+	GetAllProducts(ctx context.Context, options any) (<-chan Product, chan error)
 	ListWithPagination(options any) ([]Product, Links, error)
 	GetProduct(id string, options any) (*Product, error)
 }
@@ -23,9 +25,9 @@ type productOp struct {
 }
 
 // GetAllProducts lists all products, returns a channel to iterate over products
-func (p *productOp) GetAllProducts(options any) (<-chan Product, chan error) {
+func (p *productOp) GetAllProducts(ctx context.Context, options any) (<-chan Product, chan error) {
 	prodChan := make(chan Product, 1)
-	errChan := make(chan error, 1)
+	errChan := make(chan error)
 	go func() {
 		defer close(errChan)
 		defer close(prodChan)
@@ -36,11 +38,16 @@ func (p *productOp) GetAllProducts(options any) (<-chan Product, chan error) {
 			}
 		}()
 		prods, links, err := p.ListWithPagination(options)
-		if err != nil {
-			errChan <- err
-			return
-		}
 		for {
+			if err != nil {
+				errChan <- err
+				return
+			}
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
 			for _, prod := range prods {
 				prodChan <- prod
 			}
@@ -55,9 +62,14 @@ func (p *productOp) GetAllProducts(options any) (<-chan Product, chan error) {
 
 // ListWithPagination lists products with pagination
 func (p *productOp) ListWithPagination(options any) ([]Product, Links, error) {
+	// products-uuid path since akeneo 7
+	basePath := productBasePath
+	if p.client.osVersion >= AkeneoPimVersion7 {
+		basePath = productUUIDBasePath
+	}
 	productResponse := new(productsResponse)
 	if err := p.client.GET(
-		productBasePath,
+		basePath,
 		options,
 		nil,
 		productResponse,
@@ -69,7 +81,12 @@ func (p *productOp) ListWithPagination(options any) ([]Product, Links, error) {
 
 // GetProduct gets a product by its identifier
 func (p *productOp) GetProduct(id string, options any) (*Product, error) {
-	sourcePath := path.Join(productBasePath, id)
+	// products-uuid path since akeneo 7
+	basePath := productBasePath
+	if p.client.osVersion >= AkeneoPimVersion7 {
+		basePath = productUUIDBasePath
+	}
+	sourcePath := path.Join(basePath, id)
 	product := new(Product)
 	if err := p.client.GET(
 		sourcePath,

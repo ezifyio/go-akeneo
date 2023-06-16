@@ -12,12 +12,14 @@ const (
 )
 
 const (
-	// AkeneoPimVersion7 is the version 7 of Akeneo PIM
-	AkeneoPimVersion7 = iota + 1
-	// AkeneoPimVersion6 is the version 6 of Akeneo PIM
-	AkeneoPimVersion6
+	// AkeneoPimVersion4 is the version 4 of Akeneo PIM
+	AkeneoPimVersion4 = iota + 4
 	// AkeneoPimVersion5 is the version 5 of Akeneo PIM
 	AkeneoPimVersion5
+	// AkeneoPimVersion6 is the version 6 of Akeneo PIM
+	AkeneoPimVersion6
+	// AkeneoPimVersion7 is the version 7 of Akeneo PIM
+	AkeneoPimVersion7
 )
 
 var (
@@ -25,5 +27,6 @@ var (
 		AkeneoPimVersion7: "7.0",
 		AkeneoPimVersion6: "6.0",
 		AkeneoPimVersion5: "5.0",
+		AkeneoPimVersion4: "4.0",
 	}
 )

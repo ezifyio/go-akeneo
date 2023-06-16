@@ -11,22 +11,13 @@ const (
 // AttributeService is an interface for interfacing with the attribute
 type AttributeService interface {
 	ListWithPagination(options any) ([]Attribute, Links, error)
-	GetAttribute(code string) (*Attribute, error)
+	GetAttribute(code string, options any) (*Attribute, error)
 	GetAttributeOptions(code string, options any) ([]AttributeOption, Links, error)
 }
 
 // attributeOp handles communication with the attribute related methods of the Akeneo API.
 type attributeOp struct {
 	client *Client
-}
-
-// AttributeListOptions specifies the optional parameters
-type AttributeListOptions struct {
-	Search                 string `url:"search,omitempty" json:"search,omitempty" mapstructure:"search"`
-	Page                   int    `url:"page,omitempty" json:"page,omitempty" mapstructure:"page"`
-	Limit                  int    `url:"limit,omitempty" json:"limit,omitempty" mapstructure:"limit"`                                                             // 10 by default
-	WithCount              bool   `url:"with_count,omitempty" json:"with_count,omitempty" mapstructure:"with_count"`                                              // false by default,decreases performance when enabled
-	WithTableSelectOptions bool   `url:"with_table_select_options,omitempty" json:"with_table_select_options,omitempty" mapstructure:"with_table_select_options"` // false by default,decreases performance when enabled
 }
 
 // ListWithPagination lists attributes with pagination
@@ -44,12 +35,12 @@ func (c *attributeOp) ListWithPagination(options any) ([]Attribute, Links, error
 }
 
 // GetAttribute gets an attribute by code
-func (c *attributeOp) GetAttribute(code string) (*Attribute, error) {
+func (c *attributeOp) GetAttribute(code string, options any) (*Attribute, error) {
 	sourcePath := path.Join(attributeBasePath, code)
 	attribute := new(Attribute)
 	if err := c.client.GET(
 		sourcePath,
-		nil,
+		options,
 		nil,
 		attribute,
 	); err != nil {

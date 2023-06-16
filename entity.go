@@ -264,9 +264,9 @@ type QualityScore struct {
 type Family struct {
 	Links                 Links               `json:"_links,omitempty" mapstructure:"_links"`
 	Code                  string              `json:"code,omitempty" mapstructure:"code"`                                     // The code of the family
+	Attributes            []string            `json:"attributes,omitempty" mapstructure:"attributes"`                         //  Attributes codes that compose the family
 	AttributeAsLabel      string              `json:"attribute_as_label,omitempty" mapstructure:"attribute_as_label"`         // The code of the attribute used as label for the family
 	AttributeAsImage      string              `json:"attribute_as_image,omitempty" mapstructure:"attribute_as_image"`         // Attribute code used as the main picture in the user interface (only since v2.fmt
-	Attributes            []string            `json:"attributes,omitempty" mapstructure:"attributes"`                         //  Attributes codes that compose the family
 	AttributeRequirements map[string][]string `json:"attribute_requirements,omitempty" mapstructure:"attribute_requirements"` //  • Attributes codes of the family that are required for the completeness calculation for the channel `channelCode`
 	Labels                map[string]string   `json:"labels,omitempty" mapstructure:"labels"`                                 //  Translatable labels. Ex: {"en_US": "T-shirt", "fr_FR": "T-shirt"}
 }
@@ -369,10 +369,10 @@ type Locale struct {
 
 // MediaFile is the struct for an akeneo media file
 type MediaFile struct {
-	Links            Links  `json:"_links,omitempty" mapstructure:"_links"`
 	Code             string `json:"code,omitempty" mapstructure:"code"`
 	OriginalFilename string `json:"original_filename,omitempty" mapstructure:"original_filename"`
 	MimeType         string `json:"mime_type,omitempty" mapstructure:"mime_type"`
 	Size             int    `json:"size,omitempty" mapstructure:"size"`
 	Extension        string `json:"extension,omitempty" mapstructure:"extension"`
+	Links            Links  `json:"_links,omitempty" mapstructure:"_links"`
 }

@@ -11,6 +11,19 @@ import (
 	"go.uber.org/ratelimit"
 )
 
+// Connector is the struct to use to interact with the Akeneo API
+type Connector struct {
+	ClientID string `json:"client_id" mapstructure:"client_id"`
+	Secret   string `json:"secret" mapstructure:"secret"`
+	UserName string `json:"username" mapstructure:"username"`
+	Password string `json:"password" mapstructure:"password"`
+}
+
+// NewClient creates a new Akeneo client
+func (c Connector) NewClient(opts ...Option) (*Client, error) {
+	return NewClient(c, opts...)
+}
+
 // Client is the main struct to use to interact with the Akeneo API
 type Client struct {
 	connector    Connector
@@ -31,8 +44,7 @@ type Client struct {
 	Media        MediaFileService
 }
 
-func (c *Client) init() error {
-
+func (c *Client) validate() error {
 	if c.baseURL == nil {
 		return errors.New("baseURL is nil")
 	}
@@ -47,12 +59,13 @@ func (c *Client) init() error {
 		return errors.New("password is empty")
 	default:
 	}
-	if c.httpClient == nil {
-		c.httpClient = http.DefaultClient
-	}
 	if _, ok := pimVersionMap[c.osVersion]; !ok {
 		return errors.Errorf("invalid osVersion %d", c.osVersion)
 	}
+	return nil
+}
+
+func (c *Client) init() error {
 	if c.limiter == nil {
 		c.limiter = ratelimit.New(defaultRateLimit, ratelimit.WithoutSlack, ratelimit.Per(time.Second))
 	}
@@ -68,12 +81,18 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	c := &Client{
 		httpClient: &http.Client{
 			Timeout: defaultHTTPTimeout,
+			Transport: &http.Transport{
+				MaxIdleConns: 10,
+			},
 		},
 		connector: con,
-		osVersion: AkeneoPimVersion6,
+		osVersion: defaultVersion,
 	}
 	for _, opt := range opts {
 		opt(c)
+	}
+	if err := c.validate(); err != nil {
+		return nil, err
 	}
 	// Set services
 	c.Auth = &authOp{c}
@@ -88,6 +107,30 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+// Option is client option function
+type Option func(*Client)
+
+// WithBaseURL sets the base URL of the Akeneo API
+func WithBaseURL(u string) Option {
+	return func(c *Client) {
+		c.baseURL, _ = url.Parse(u)
+	}
+}
+
+// WithRateLimit sets the rate limit of the Akeneo API
+func WithRateLimit(limit int, t time.Duration) Option {
+	return func(c *Client) {
+		c.limiter = ratelimit.New(limit, ratelimit.WithoutSlack, ratelimit.Per(t))
+	}
+}
+
+// WithVersion sets the version of the Akeneo API
+func WithVersion(v int) Option {
+	return func(c *Client) {
+		c.osVersion = v
+	}
 }
 
 // createAndDoGetHeaders create a request and get the headers
