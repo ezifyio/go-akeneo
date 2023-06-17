@@ -19,6 +19,7 @@ const (
 	ValueTypeSimpleSelect
 	ValueTypeMultiSelect
 	ValueTypeTable
+	ValueTypeMedia
 )
 
 // ValueTypeName is the name of the value type
@@ -32,6 +33,7 @@ var ValueTypeName = map[int]string{
 	ValueTypeSimpleSelect:     "simple_select",
 	ValueTypeMultiSelect:      "multi_select",
 	ValueTypeTable:            "table",
+	ValueTypeMedia:            "media_link",
 }
 
 type ErrorResponse struct {
@@ -91,7 +93,13 @@ type ProductValue struct {
 	Locale     string `json:"locale,omitempty" mapstructure:"locale"`
 	Scope      string `json:"scope,omitempty" mapstructure:"scope"`
 	Data       any    `json:"data,omitempty" mapstructure:"data"`
+	Links      *Links `json:"_links,omitempty" mapstructure:"_links"`
 	LinkedData any    `json:"linked_data,omitempty" mapstructure:"linked_data"`
+}
+
+// IsLocalized returns true if the value is localized
+func (v ProductValue) IsLocalized() bool {
+	return v.Locale != ""
 }
 
 type PimProductValue interface {
@@ -100,6 +108,15 @@ type PimProductValue interface {
 
 // ParseValue tries to parse the value to correct type
 func (v ProductValue) ParseValue() (PimProductValue, error) {
+	if v.Links != nil {
+		// todo: media link
+		return MediaValue{
+			Locale: v.Locale,
+			Scope:  v.Scope,
+			Data:   v.Data.(string),
+			Links:  v.Links,
+		}, nil
+	}
 	// if v.Data != nil-> simple select, multi select
 	if v.LinkedData != nil {
 		switch v.Data.(type) {
@@ -207,6 +224,27 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 	default:
 	}
 	return nil, errors.New("unknown data type")
+}
+
+// MediaValue
+
+type MediaValue struct {
+	Locale string `json:"locale,omitempty" mapstructure:"locale"`
+	Scope  string `json:"scope,omitempty" mapstructure:"scope"`
+	Data   string `json:"data,omitempty" mapstructure:"data"`
+	Links  *Links `json:"_links,omitempty" mapstructure:"_links"`
+}
+
+func (MediaValue) ValueType() int {
+	return ValueTypeMedia
+}
+
+// DownloadURL returns the download url of the media
+func (v MediaValue) DownloadURL() string {
+	if v.Links != nil {
+		return v.Links.Download.Href
+	}
+	return ""
 }
 
 // StringValue is the struct for an akeneo text type product value
