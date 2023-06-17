@@ -15,6 +15,8 @@ type FamilyService interface {
 	GetFamily(familyCode string, options any) (*Family, error)
 	GetFamilyVariants(familyCode string, options any) ([]FamilyVariant, error)
 	GetFamilyVariant(familyCode string, familyVariantCode string) (*FamilyVariant, error)
+	CreateFamily(family Family) error
+	UpdateOrCreate(familyCode, familyVariantCode string, familyVariant FamilyVariant) error
 }
 
 type familyOp struct {
@@ -82,24 +84,51 @@ func (f *familyOp) GetFamilyVariant(familyCode string, familyVariantCode string)
 	return result, nil
 }
 
-// FamiliesResponse is the struct for a akeneo families response
+// CreateFamily creates a family
+func (f *familyOp) CreateFamily(family Family) error {
+	if err := f.client.POST(
+		familyBasePath,
+		nil,
+		family,
+		nil,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateOrCreate updates or creates a family variant
+func (f *familyOp) UpdateOrCreate(familyCode, familyVariantCode string, familyVariant FamilyVariant) error {
+	sourcePath := path.Join(familyBasePath, familyCode, "variants", familyVariantCode)
+	if err := f.client.PATCH(
+		sourcePath,
+		nil,
+		familyVariant,
+		nil,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+// FamiliesResponse is the struct for an akeneo families response
 type FamiliesResponse struct {
-	Links       Links       `json:"_links" mapstructure:"_links"`
-	CurrentPage int         `json:"current_page" mapstructure:"current_page"`
-	Embedded    familyItems `json:"_embedded" mapstructure:"_embedded"`
+	Links       Links       `json:"_links,omitempty" mapstructure:"_links"`
+	CurrentPage int         `json:"current_page,omitempty" mapstructure:"current_page"`
+	Embedded    familyItems `json:"_embedded,omitempty" mapstructure:"_embedded"`
 }
 
 type familyItems struct {
-	Items []Family `json:"items" mapstructure:"items"`
+	Items []Family `json:"items,omitempty" mapstructure:"items"`
 }
 
-// FamilyVariantsResponse is the struct for a akeneo family variants response
+// FamilyVariantsResponse is the struct for an akeneo family variants response
 type FamilyVariantsResponse struct {
-	Links       Links              `json:"_links" mapstructure:"_links"`
-	CurrentPage int                `json:"current_page" mapstructure:"current_page"`
-	Embedded    familyVariantItems `json:"_embedded" mapstructure:"_embedded"`
+	Links       Links              `json:"_links,omitempty" mapstructure:"_links"`
+	CurrentPage int                `json:"current_page,omitempty" mapstructure:"current_page"`
+	Embedded    familyVariantItems `json:"_embedded,omitempty" mapstructure:"_embedded"`
 }
 
 type familyVariantItems struct {
-	Items []FamilyVariant `json:"items" mapstructure:"items"`
+	Items []FamilyVariant `json:"items,omitempty" mapstructure:"items"`
 }

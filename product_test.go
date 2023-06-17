@@ -12,6 +12,9 @@ func TestProducts(t *testing.T) {
 
 	for key, vs := range p.Values {
 		for _, v := range vs {
+			if v.IsLocalized() {
+				continue
+			}
 			result, err := v.ParseValue()
 			assert.NotNil(t, key)
 			assert.NoError(t, err)

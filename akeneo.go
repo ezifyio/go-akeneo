@@ -169,8 +169,10 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 		SetHeader("Accept", defaultAccept).
 		SetHeader("User-Agent", defaultUserAgent).
 		SetAuthToken(c.token).
-		SetResult(result).
 		SetError(&errResp)
+	if result != nil {
+		request.SetResult(result)
+	}
 	if opts != nil {
 		if v, ok := opts.(url.Values); ok {
 			request.SetQueryParamsFromValues(v)
@@ -209,7 +211,7 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 func (c *Client) GET(relPath string, ops, data, result any) error {
 	_, err := c.createAndDoGetHeaders(http.MethodGet, relPath, ops, data, result)
 	if err != nil {
-		return errors.Wrap(err, "create and do error")
+		return errors.Wrap(err, "GET error")
 	}
 	return nil
 }
@@ -219,7 +221,16 @@ func (c *Client) GET(relPath string, ops, data, result any) error {
 func (c *Client) POST(relPath string, ops, data, result any) error {
 	_, err := c.createAndDoGetHeaders(http.MethodPost, relPath, ops, data, result)
 	if err != nil {
-		return errors.Wrap(err, "create and do error")
+		return errors.Wrap(err, "POST error")
+	}
+	return nil
+}
+
+// PATCH creates a patch request and execute it
+func (c *Client) PATCH(relPath string, ops, data, result any) error {
+	_, err := c.createAndDoGetHeaders(http.MethodPatch, relPath, ops, data, result)
+	if err != nil {
+		return errors.Wrap(err, "PATCH error")
 	}
 	return nil
 }

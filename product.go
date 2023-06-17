@@ -99,13 +99,13 @@ func (p *productOp) GetProduct(id string, options any) (*Product, error) {
 	return product, nil
 }
 
-// ProductsResponse is the struct for a akeneo products response
+// ProductsResponse is the struct for an akeneo products response
 type ProductsResponse struct {
-	Links       Links        `json:"_links" mapstructure:"_links"`
-	CurrentPage int          `json:"current_page" mapstructure:"current_page"`
-	Embedded    productItems `json:"_embedded" mapstructure:"_embedded"`
+	Links       Links        `json:"_links,omitempty" mapstructure:"_links"`
+	CurrentPage int          `json:"current_page,omitempty" mapstructure:"current_page"`
+	Embedded    productItems `json:"_embedded,omitempty" mapstructure:"_embedded"`
 }
 
 type productItems struct {
-	Items []Product `json:"items" mapstructure:"items"`
+	Items []Product `json:"items,omitempty" mapstructure:"items"`
 }
