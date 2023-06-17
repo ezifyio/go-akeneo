@@ -589,3 +589,8 @@ type MediaFile struct {
 	Extension        string `json:"extension,omitempty" mapstructure:"extension"`
 	Links            Links  `json:"_links,omitempty" mapstructure:"_links"`
 }
+
+// DownloadURL function returns the download url of the media file
+func (m *MediaFile) DownloadURL() string {
+	return m.Links.Download.Href
+}

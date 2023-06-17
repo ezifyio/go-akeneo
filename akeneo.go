@@ -2,6 +2,7 @@ package goakeneo
 
 import (
 	"github.com/go-resty/resty/v2"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -204,6 +205,34 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 		return http.Header{}, errors.Errorf("request error : %s", errResp.Message)
 	}
 	return resp.Header(), nil
+}
+
+func (c *Client) download(downloadURL string, writer io.Writer) error {
+	if err := c.Auth.AutoRefreshToken(); err != nil {
+		return err
+	}
+	client := resty.NewWithClient(c.httpClient).
+		SetRetryCount(c.retryCNT).
+		SetRetryWaitTime(defaultRetryWaitTime).
+		SetRetryMaxWaitTime(defaultRetryMaxWaitTime)
+	request := client.R().
+		SetHeader("User-Agent", defaultUserAgent).
+		SetAuthToken(c.token)
+	// rate limit
+	c.limiter.Take()
+	resp, err := request.Get(downloadURL)
+	if err != nil {
+		return errors.Wrap(err, "resty execute error")
+	}
+	if resp.IsError() {
+		return errors.Errorf("request error : %s", resp.String())
+	}
+	_, err = io.Copy(writer, resp.RawBody())
+	if err != nil {
+		return errors.Wrap(err, "io copy error")
+	}
+	resp.RawBody().Close()
+	return nil
 }
 
 // GET creates a get request and execute it
