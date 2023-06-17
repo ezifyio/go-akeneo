@@ -11,7 +11,7 @@ const mediaBasePath = "/api/rest/v1/media-files"
 type MediaFileService interface {
 	ListPagination(options any) ([]MediaFile, Links, error)
 	GetByCode(code string, options any) (*MediaFile, error)
-	Download(code string, options any) ([]byte, error)
+	Download(code, filePath string, options any) error
 }
 
 type mediaOp struct {
