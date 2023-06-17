@@ -445,25 +445,25 @@ func (p ProductModel) validateBeforeCreate() error {
 }
 
 type association struct {
-	Groups        []string `json:"groups" mapstructure:"groups"`
-	Products      []string `json:"products" mapstructure:"products"`
-	ProductModels []string `json:"product_models" mapstructure:"product_models"`
+	Groups        []string `json:"groups,omitempty" mapstructure:"groups"`
+	Products      []string `json:"products,omitempty" mapstructure:"products"`
+	ProductModels []string `json:"product_models,omitempty" mapstructure:"product_models"`
 }
 
 // QuantifiedAssociations is the struct for an akeneo quantified associations
 type quantifiedAssociation struct {
-	Products      []productQuantity      `json:"products" mapstructure:"products"`
-	ProductModels []productModelQuantity `json:"product_models" mapstructure:"product_models"`
+	Products      []productQuantity      `json:"products,omitempty" mapstructure:"products"`
+	ProductModels []productModelQuantity `json:"product_models,omitempty" mapstructure:"product_models"`
 }
 
 type productQuantity struct {
-	Identifier string `json:"identifier" mapstructure:"identifier"`
-	Quantity   int    `json:"quantity" mapstructure:"quantity"`
+	Identifier string `json:"identifier,omitempty" mapstructure:"identifier"`
+	Quantity   int    `json:"quantity,omitempty" mapstructure:"quantity"`
 }
 
 type productModelQuantity struct {
-	Code     string `json:"code" mapstructure:"code"`
-	Quantity int    `json:"quantity" mapstructure:"quantity"`
+	Code     string `json:"code,omitempty" mapstructure:"code"`
+	Quantity int    `json:"quantity,omitempty" mapstructure:"quantity"`
 }
 
 // QualityScore is the struct for quality score
@@ -534,50 +534,50 @@ type Attribute struct {
 
 // AttributeOption is the struct for an akeneo attribute option,see:
 type AttributeOption struct {
-	Links     Links             `json:"_links" mapstructure:"_links"`
-	Code      string            `json:"code" mapstructure:"code"`
-	Attribute string            `json:"attribute" mapstructure:"attribute"`
-	SortOrder int               `json:"sort_order" mapstructure:"sort_order"`
-	Labels    map[string]string `json:"labels" mapstructure:"labels"`
+	Links     Links             `json:"_links,omitempty" mapstructure:"_links"`
+	Code      string            `json:"code,omitempty" mapstructure:"code"`
+	Attribute string            `json:"attribute,omitempty" mapstructure:"attribute"`
+	SortOrder int               `json:"sort_order,omitempty" mapstructure:"sort_order"`
+	Labels    map[string]string `json:"labels,omitempty" mapstructure:"labels"`
 }
 
 // Category is the struct for an akeneo category
 type Category struct {
-	Links    Links                    `json:"_links" mapstructure:"_links"`
-	Code     string                   `json:"code" mapstructure:"code"`
-	Parent   string                   `json:"parent" mapstructure:"parent"`
-	Updated  string                   `json:"updated" mapstructure:"updated"`
-	Position int                      `json:"position" mapstructure:"position"` // since 7.0 with query parameter "with_positions=true"
-	Labels   map[string]string        `json:"labels" mapstructure:"labels"`
-	Values   map[string]categoryValue `json:"values" mapstructure:"values"`
+	Links    Links                    `json:"_links,omitempty" mapstructure:"_links"`
+	Code     string                   `json:"code,omitempty" mapstructure:"code"`
+	Parent   string                   `json:"parent,omitempty" mapstructure:"parent"`
+	Updated  string                   `json:"updated,omitempty" mapstructure:"updated"`
+	Position int                      `json:"position,omitempty" mapstructure:"position"` // since 7.0 with query parameter "with_positions=true"
+	Labels   map[string]string        `json:"labels,omitempty" mapstructure:"labels"`
+	Values   map[string]categoryValue `json:"values,omitempty" mapstructure:"values"`
 }
 
 // categoryValue is the struct for an akeneo category value
 // todo : Data field is not yet implemented well
 type categoryValue struct {
-	Data          any    `json:"data" mapstructure:"data"`           //  AttributeValue
-	Type          string `json:"type" mapstructure:"type"`           //  AttributeType
-	Locale        string `json:"locale" mapstructure:"locale"`       //  AttributeLocale
-	Channel       string `json:"channel" mapstructure:"channel"`     //  AttributeChannel
-	AttributeCode string `json:"attribute" mapstructure:"attribute"` //  AttributeCode with uuid, i.e. "description|96b88bf4-c2b7-4b64-a1f9-5d4876c02c26"
+	Data          any    `json:"data,omitempty" mapstructure:"data"`           //  AttributeValue
+	Type          string `json:"type,omitempty" mapstructure:"type"`           //  AttributeType
+	Locale        string `json:"locale,omitempty" mapstructure:"locale"`       //  AttributeLocale
+	Channel       string `json:"channel,omitempty" mapstructure:"channel"`     //  AttributeChannel
+	AttributeCode string `json:"attribute,omitempty" mapstructure:"attribute"` //  AttributeCode with uuid, i.e. "description|96b88bf4-c2b7-4b64-a1f9-5d4876c02c26"
 }
 
 // Channel is the struct for an akeneo channel
 type Channel struct {
-	Links           Links             `json:"_links" mapstructure:"_links"`
-	Code            string            `json:"code" mapstructure:"code"`
-	Currencies      []string          `json:"currencies" mapstructure:"currencies"`
-	Locales         []string          `json:"locales" mapstructure:"locales"`
-	CategoryTree    string            `json:"category_tree" mapstructure:"category_tree"`
-	ConversionUnits map[string]string `json:"conversion_units" mapstructure:"conversion_units"`
-	Labels          map[string]string `json:"labels" mapstructure:"labels"`
+	Links           Links             `json:"_links,omitempty" mapstructure:"_links"`
+	Code            string            `json:"code,omitempty" mapstructure:"code"`
+	Currencies      []string          `json:"currencies,omitempty" mapstructure:"currencies"`
+	Locales         []string          `json:"locales,omitempty" mapstructure:"locales"`
+	CategoryTree    string            `json:"category_tree,omitempty" mapstructure:"category_tree"`
+	ConversionUnits map[string]string `json:"conversion_units,omitempty" mapstructure:"conversion_units"`
+	Labels          map[string]string `json:"labels,omitempty" mapstructure:"labels"`
 }
 
 // Locale is the struct for an akeneo locale
 type Locale struct {
-	Links   Links  `json:"_links" mapstructure:"_links"`
-	Code    string `json:"code" mapstructure:"code"`
-	Enabled bool   `json:"enabled" mapstructure:"enabled"`
+	Links   Links  `json:"_links,omitempty" mapstructure:"_links"`
+	Code    string `json:"code,omitempty" mapstructure:"code"`
+	Enabled bool   `json:"enabled,omitempty" mapstructure:"enabled"`
 }
 
 // MediaFile is the struct for an akeneo media file
