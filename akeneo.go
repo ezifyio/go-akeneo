@@ -260,6 +260,41 @@ func (c *Client) download(downloadURL string, fp string) error {
 	return nil
 }
 
+func (c *Client) upload(endpoint string, data any) (string, error) {
+	if err := c.Auth.AutoRefreshToken(); err != nil {
+		return "", err
+	}
+	pathURL, _ := url.Parse(endpoint)
+	uploadURL := c.baseURL.ResolveReference(pathURL).String()
+	client := resty.NewWithClient(c.httpClient).
+		SetRetryCount(c.retryCNT).
+		SetRetryWaitTime(defaultRetryWaitTime).
+		SetRetryMaxWaitTime(defaultRetryMaxWaitTime).
+		AddRetryCondition(func(r *resty.Response, err error) bool {
+			return r.StatusCode() == http.StatusTooManyRequests
+		})
+	request := client.R().
+		SetHeader("User-Agent", defaultUserAgent).
+		SetAuthToken(c.token).
+		SetHeader("Content-Type", defaultUploadContentType)
+	// rate limit
+	c.limiter.Take()
+	resp, err := request.
+		SetBody(data).
+		Post(uploadURL)
+	if err != nil {
+		return "", errors.Wrap(err, "resty execute post error")
+	}
+	if resp.IsError() {
+		var errResp ErrorResponse
+		if err := json.Unmarshal(resp.Body(), &errResp); err != nil {
+			return "", errors.Wrap(err, "unmarshal error")
+		}
+		return "", errors.Errorf("request error :error Code: %d, error message: %s", errResp.Code, errResp.Message)
+	}
+	return resp.Header().Get("Location"), nil
+}
+
 // GET creates a get request and execute it
 // result must be a pointer to a struct
 func (c *Client) GET(relPath string, ops, data, result any) error {
