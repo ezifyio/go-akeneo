@@ -1,7 +1,7 @@
 package goakeneo
 
 import (
-	"os"
+	"net/url"
 	"path"
 )
 
@@ -50,23 +50,10 @@ func (c *mediaOp) GetByCode(code string, options any) (*MediaFile, error) {
 // Download downloads a media file by code
 func (c *mediaOp) Download(code, filePath string, options any) error {
 	options = nil // options are not supported for downloading media files
-	result := new(MediaFile)
-	sourcePath := path.Join(mediaBasePath, code)
-	if err := c.client.GET(
-		sourcePath,
-		options,
-		nil,
-		result,
-	); err != nil {
-		return err
-	}
-	downloadURL := result.Links.Download.Href
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	if err := c.client.download(downloadURL, file); err != nil {
+	sourcePath := path.Join(mediaBasePath, code, "download")
+	sourceP, _ := url.Parse(sourcePath)
+	downloadURL := c.client.baseURL.ResolveReference(sourceP).String()
+	if err := c.client.download(downloadURL, filePath); err != nil {
 		return err
 	}
 	return nil

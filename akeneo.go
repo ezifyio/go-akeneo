@@ -2,7 +2,6 @@ package goakeneo
 
 import (
 	"github.com/go-resty/resty/v2"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -43,7 +42,7 @@ type Client struct {
 	Category     CategoryService
 	Channel      ChannelService
 	Locale       LocaleService
-	Media        MediaFileService
+	MediaFile    MediaFileService
 	ProductModel ProductModelService
 }
 
@@ -106,7 +105,7 @@ func NewClient(con Connector, opts ...Option) (*Client, error) {
 	c.Category = &categoryOp{c}
 	c.Channel = &channelOp{c}
 	c.Locale = &localeOp{c}
-	c.Media = &mediaOp{c}
+	c.MediaFile = &mediaOp{c}
 	c.ProductModel = &productModelOp{c}
 	if err := c.init(); err != nil {
 		return nil, err
@@ -207,7 +206,7 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 	return resp.Header(), nil
 }
 
-func (c *Client) download(downloadURL string, writer io.Writer) error {
+func (c *Client) download(downloadURL string, fp string) error {
 	if err := c.Auth.AutoRefreshToken(); err != nil {
 		return err
 	}
@@ -220,18 +219,12 @@ func (c *Client) download(downloadURL string, writer io.Writer) error {
 		SetAuthToken(c.token)
 	// rate limit
 	c.limiter.Take()
-	resp, err := request.Get(downloadURL)
+	_, err := request.
+		SetOutput(fp).
+		Get(downloadURL)
 	if err != nil {
-		return errors.Wrap(err, "resty execute error")
+		return errors.Wrap(err, "resty execute get error")
 	}
-	if resp.IsError() {
-		return errors.Errorf("request error : %s", resp.String())
-	}
-	_, err = io.Copy(writer, resp.RawBody())
-	if err != nil {
-		return errors.Wrap(err, "io copy error")
-	}
-	resp.RawBody().Close()
 	return nil
 }
 
