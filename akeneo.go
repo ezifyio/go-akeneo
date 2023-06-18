@@ -210,6 +210,7 @@ func (c *Client) download(downloadURL string, fp string) error {
 	if err := c.Auth.AutoRefreshToken(); err != nil {
 		return err
 	}
+	var errResp ErrorResponse
 	client := resty.NewWithClient(c.httpClient).
 		SetRetryCount(c.retryCNT).
 		SetRetryWaitTime(defaultRetryWaitTime).
@@ -220,10 +221,14 @@ func (c *Client) download(downloadURL string, fp string) error {
 	// rate limit
 	c.limiter.Take()
 	_, err := request.
+		SetError(&errResp).
 		SetOutput(fp).
 		Get(downloadURL)
 	if err != nil {
 		return errors.Wrap(err, "resty execute get error")
+	}
+	if errResp.Code != 0 {
+		return errors.Errorf("request error :code %d, message: %s", errResp.Code, errResp.Message)
 	}
 	return nil
 }

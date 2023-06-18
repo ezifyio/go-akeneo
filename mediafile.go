@@ -49,7 +49,7 @@ func (c *mediaOp) GetByCode(code string, options any) (*MediaFile, error) {
 
 // Download downloads a media file by code
 func (c *mediaOp) Download(code, filePath string, options any) error {
-	options = nil // options are not supported for downloading media files
+	options = nil // options are not supported for downloading media files yet
 	sourcePath := path.Join(mediaBasePath, code, "download")
 	sourceP, _ := url.Parse(sourcePath)
 	downloadURL := c.client.baseURL.ResolveReference(sourceP).String()
