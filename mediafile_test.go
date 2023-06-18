@@ -22,6 +22,6 @@ func TestMediaOp_GetByCode(t *testing.T) {
 
 func TestMediaOp_Download(t *testing.T) {
 	c := MockDLClient()
-	err := c.MediaFile.Download("/1/3/e/d/13ed17a77f6ff8748758083641d3a33e4c651d7e_0______.jpeg", "test.png", nil)
+	err := c.MediaFile.Download("/1/3/e/d/13ed17a77f6ff8748758083641d3a33e4c651d7e_0______.jpeg", "./media/test.png", nil)
 	assert.NoError(t, err)
 }

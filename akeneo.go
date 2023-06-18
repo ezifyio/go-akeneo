@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"reflect"
 	"time"
 
@@ -241,6 +242,12 @@ func (c *Client) download(downloadURL string, fp string) error {
 			return errors.Wrap(err, "unmarshal error")
 		}
 		return errors.Errorf("request error :error Code: %d, error message: %s", errResp.Code, errResp.Message)
+	}
+	dir := filepath.Dir(fp)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return errors.Wrapf(err, "failed to create dir, path: %s", dir)
+		}
 	}
 	file, err := os.Create(fp)
 	if err != nil {
