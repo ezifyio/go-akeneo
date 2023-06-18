@@ -1,10 +1,13 @@
 package goakeneo
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/go-resty/resty/v2"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"time"
 
@@ -214,26 +217,39 @@ func (c *Client) download(downloadURL string, fp string) error {
 	client := resty.NewWithClient(c.httpClient).
 		SetRetryCount(c.retryCNT).
 		SetRetryWaitTime(defaultRetryWaitTime).
-		SetRetryMaxWaitTime(defaultRetryMaxWaitTime)
+		SetRetryMaxWaitTime(defaultRetryMaxWaitTime).
+		AddRetryCondition(func(r *resty.Response, err error) bool {
+			return r.StatusCode() == http.StatusTooManyRequests
+		})
 	request := client.R().
 		SetHeader("User-Agent", defaultUserAgent).
 		SetAuthToken(c.token)
 	// rate limit
 	c.limiter.Take()
 	resp, err := request.
-		SetOutput(fp).
 		Get(downloadURL)
 	if err != nil {
 		return errors.Wrap(err, "resty execute get error")
 	}
+	// 如果是404，说明文件不存在
+	if resp.StatusCode() == http.StatusNotFound {
+		return errors.Errorf("file not found : %s", downloadURL)
+	}
 	if resp.IsError() {
 		var errResp ErrorResponse
 		if err := json.Unmarshal(resp.Body(), &errResp); err != nil {
-			return errors.Wrap(err, "unable to unmarshal error response")
+			return errors.Wrap(err, "unmarshal error")
 		}
-		return errors.Errorf("request error : %s", errResp.Message)
+		return errors.Errorf("request error :error Code: %d, error message: %s", errResp.Code, errResp.Message)
 	}
-
+	file, err := os.Create(fp)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create file, path: %s", fp)
+	}
+	defer file.Close()
+	if _, err := io.Copy(file, bytes.NewReader(resp.Body())); err != nil {
+		return errors.Wrap(err, "failed to copy file")
+	}
 	return nil
 }
 
