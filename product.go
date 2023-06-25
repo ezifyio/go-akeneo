@@ -18,6 +18,7 @@ type ProductService interface {
 	GetAllProducts(ctx context.Context, options any) (<-chan Product, chan error)
 	ListWithPagination(options any) ([]Product, Links, error)
 	GetProduct(id string, options any) (*Product, error)
+	UpdateOrCreateProducts(products []Product) (PatchProductResponse, error)
 }
 
 type productOp struct {
@@ -99,6 +100,19 @@ func (p *productOp) GetProduct(id string, options any) (*Product, error) {
 	return product, nil
 }
 
+func (p *productOp) UpdateOrCreateProducts(products []Product) (PatchProductResponse, error) {
+	result := new(PatchProductResponse)
+	if err := p.client.PATCH(
+		productBasePath,
+		nil,
+		products,
+		result,
+	); err != nil {
+		return nil, err
+	}
+	return *result, nil
+}
+
 // ProductsResponse is the struct for an akeneo products response
 type ProductsResponse struct {
 	Links       Links        `json:"_links,omitempty" mapstructure:"_links"`
@@ -109,3 +123,13 @@ type ProductsResponse struct {
 type productItems struct {
 	Items []Product `json:"items,omitempty" mapstructure:"items"`
 }
+
+type PatchProductResponseLine struct {
+	Line       int    `json:"line,omitempty" mapstructure:"line"`
+	Identifier string `json:"identifier,omitempty" mapstructure:"identifier"`
+	Code       string `json:"code,omitempty" mapstructure:"code"`
+	StatusCode int    `json:"status_code,omitempty" mapstructure:"status_code"`
+	Message    string `json:"message,omitempty" mapstructure:"message"`
+}
+type PatchProductRequest []Product
+type PatchProductResponse []PatchProductResponseLine

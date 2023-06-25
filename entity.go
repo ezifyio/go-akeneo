@@ -149,7 +149,7 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 			}
 			return result, nil
 		default:
-			return nil, fmt.Errorf("unknown linked data type %T", v.LinkedData)
+			return nil, fmt.Errorf("unknown linked data type %v", v)
 		}
 	}
 	switch v.Data.(type) {
@@ -223,7 +223,7 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 		return result, nil
 	default:
 	}
-	return nil, errors.New("unknown data type")
+	return nil, errors.Errorf("unknown data type %v", v)
 }
 
 // MediaValue

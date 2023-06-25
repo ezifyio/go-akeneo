@@ -180,7 +180,11 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 	}
 	if opts != nil {
 		if v, ok := opts.(url.Values); ok {
-			request.SetQueryParamsFromValues(v)
+			for key, values := range v {
+				for _, value := range values {
+					u.Query().Set(key, value)
+				}
+			}
 		} else {
 			// check if opts is a struct or a pointer to a struct
 			t := reflect.TypeOf(opts)
@@ -189,7 +193,11 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 				if err != nil {
 					return http.Header{}, errors.Wrap(err, "unable to convert struct to url values")
 				}
-				request.SetQueryParamsFromValues(v)
+				for key, values := range v {
+					for _, value := range values {
+						u.Query().Set(key, value)
+					}
+				}
 			} else {
 				return http.Header{}, errors.New("opts must be a struct or a pointer to a struct or a url.Values")
 			}
