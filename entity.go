@@ -372,9 +372,9 @@ func (BooleanValue) ValueType() int {
 }
 
 type linkedData struct {
-	Attribute string              `json:"attribute,omitempty" mapstructure:"attribute"`
-	Code      string              `json:"code,omitempty" mapstructure:"code"`
-	Labels    []map[string]string `json:"labels,omitempty" mapstructure:"labels"`
+	Attribute string            `json:"attribute,omitempty" mapstructure:"attribute"`
+	Code      string            `json:"code,omitempty" mapstructure:"code"`
+	Labels    map[string]string `json:"labels,omitempty" mapstructure:"labels"`
 }
 
 // SimpleSelectValue is the struct for an akeneo simple select type product value
