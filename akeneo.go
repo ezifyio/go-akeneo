@@ -37,7 +37,7 @@ type Client struct {
 	token        string            // token is the access token
 	refreshToken string            // refreshToken is the refresh token
 	tokenExp     time.Time         // tokenExp is the token expiration time,5 minutes before the actual expiration
-	osVersion    int               // osVersion is the version of the OS
+	osVersion    int               // osVersion is the version of the OS,default pim 6
 	retryCNT     int               // retryCNT is the retry count
 	limiter      ratelimit.Limiter // limiter, default 5 requests per second
 	Auth         AuthService
@@ -180,11 +180,13 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 	}
 	if opts != nil {
 		if v, ok := opts.(url.Values); ok {
+			query := u.Query()
 			for key, values := range v {
 				for _, value := range values {
-					u.Query().Set(key, value)
+					query.Set(key, value)
 				}
 			}
+			u.RawQuery = query.Encode()
 		} else {
 			// check if opts is a struct or a pointer to a struct
 			t := reflect.TypeOf(opts)
@@ -193,11 +195,13 @@ func (c *Client) createAndDoGetHeaders(method, relPath string, opts, data, resul
 				if err != nil {
 					return http.Header{}, errors.Wrap(err, "unable to convert struct to url values")
 				}
+				query := u.Query()
 				for key, values := range v {
 					for _, value := range values {
-						u.Query().Set(key, value)
+						query.Set(key, value)
 					}
 				}
+				u.RawQuery = query.Encode()
 			} else {
 				return http.Header{}, errors.New("opts must be a struct or a pointer to a struct or a url.Values")
 			}
