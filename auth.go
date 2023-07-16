@@ -37,17 +37,22 @@ func (a *authOp) GrantByPassword() error {
 	rel, _ := url.Parse(authBasePath)
 	// Make the full url based on the relative path
 	u := a.client.baseURL.ResolveReference(rel)
+	var errResp ErrorResponse
 	_, err := resty.New().R().
 		SetHeader("Content-Type", defaultContentType).
 		SetHeader("Authorization", base64BasicAuth(a.client.connector.ClientID, a.client.connector.Secret)).
 		SetBody(request).
 		SetResult(result).
+		SetError(&errResp).
 		Execute(http.MethodPost, u.String())
 	if err != nil {
 		return errors.Wrap(err, "unable to authenticate to the Akeneo API")
 	}
 	if err := result.validate(); err != nil {
 		return errors.Wrap(err, "invalid response from the Akeneo API")
+	}
+	if errResp.Message != "" {
+		return errors.Wrapf(err, "unable to authenticate to the Akeneo API: %s", errResp.Message)
 	}
 	a.client.token = result.AccessToken
 	a.client.refreshToken = result.RefreshToken

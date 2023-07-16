@@ -8,14 +8,11 @@ import (
 
 func TestProducts(t *testing.T) {
 	c := MockDLClient()
-	p, err := c.Product.GetProduct("code-9200-eprcg", nil)
+	p, err := c.Product.GetProduct("code-15768-vw128j", nil)
 	assert.NoError(t, err)
 
 	for key, vs := range p.Values {
 		for _, v := range vs {
-			if v.IsLocalized() {
-				continue
-			}
 			result, err := v.ParseValue()
 			if err != nil {
 				t.Error(err)
@@ -26,7 +23,7 @@ func TestProducts(t *testing.T) {
 }
 
 func TestProductOp_GetAllProducts(t *testing.T) {
-	c := MockDLClient()
+	c := MockClient()
 	prodChan, errChan := c.Product.GetAllProducts(context.Background(), nil)
 	go func() {
 		for err := range errChan {

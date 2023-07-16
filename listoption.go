@@ -1,19 +1,5 @@
 package goakeneo
 
-import (
-	"encoding/json"
-	"html"
-)
-
-// SearchFilter is a map of search filters,see :
-// https://api.akeneo.com/documentation/filter.html
-type SearchFilter map[string][]map[string]interface{}
-
-func (sf SearchFilter) String() string {
-	t, _ := json.Marshal(sf)
-	return html.UnescapeString(string(t))
-}
-
 // ListOptions is the struct for common list options
 type ListOptions struct {
 	Search    string `url:"search,omitempty"`
