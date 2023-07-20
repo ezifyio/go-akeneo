@@ -23,7 +23,7 @@ func TestFamilyOp_CreateFamily(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	c := MockClient()
+	c := MockDLClient()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := c.Family.CreateFamily(tt.family); (err != nil) != tt.wantErr {

@@ -2,8 +2,9 @@ package goakeneo
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProducts(t *testing.T) {
@@ -23,7 +24,7 @@ func TestProducts(t *testing.T) {
 }
 
 func TestProductOp_GetAllProducts(t *testing.T) {
-	c := MockClient()
+	c := MockDLClient()
 	prodChan, errChan := c.Product.GetAllProducts(context.Background(), nil)
 	go func() {
 		for err := range errChan {

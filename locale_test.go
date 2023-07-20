@@ -1,12 +1,13 @@
 package goakeneo
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLocaleOp_ListWithPagination(t *testing.T) {
-	c := MockClient()
+	c := MockDLClient()
 	locales, pagi, err := c.Locale.ListWithPagination(nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, locales)
