@@ -2,10 +2,11 @@ package goakeneo
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"net/url"
 	"strconv"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 // ValueTypeConst
@@ -20,6 +21,7 @@ const (
 	ValueTypeMultiSelect
 	ValueTypeTable
 	ValueTypeMedia
+	ValueTypeMediaSet
 )
 
 // ValueTypeName is the name of the value type
@@ -34,6 +36,7 @@ var ValueTypeName = map[int]string{
 	ValueTypeMultiSelect:      "multi_select",
 	ValueTypeTable:            "table",
 	ValueTypeMedia:            "media_link",
+	ValueTypeMediaSet:         "media_set",
 }
 
 type ErrorResponse struct {
@@ -93,7 +96,7 @@ type ProductValue struct {
 	Locale     string `json:"locale,omitempty" mapstructure:"locale"`
 	Scope      string `json:"scope,omitempty" mapstructure:"scope"`
 	Data       any    `json:"data,omitempty" mapstructure:"data"`
-	Links      *Links `json:"_links,omitempty" mapstructure:"_links"`
+	Links      any    `json:"_links,omitempty" mapstructure:"_links"`
 	LinkedData any    `json:"linked_data,omitempty" mapstructure:"linked_data"`
 }
 
@@ -108,14 +111,34 @@ type PimProductValue interface {
 
 // ParseValue tries to parse the value to correct type
 func (v ProductValue) ParseValue() (PimProductValue, error) {
+
 	if v.Links != nil {
-		// todo: media link
-		return MediaValue{
-			Locale: v.Locale,
-			Scope:  v.Scope,
-			Data:   v.Data.(string),
-			Links:  v.Links,
-		}, nil
+		if _, ok := v.Data.(string); ok {
+			link, ok := v.Links.(*Links)
+			if !ok {
+				return nil, errors.New("invalid links")
+			}
+			return MediaValue{
+				Locale: v.Locale,
+				Scope:  v.Scope,
+				Data:   v.Data.(string),
+				Links:  link,
+			}, nil
+		} else {
+			links, ok := v.Links.([]*Links)
+			if !ok {
+				return nil, errors.New("invalid links")
+			}
+			if _, ok := v.Data.([]string); ok {
+				return MediaSet{
+					Locale: v.Locale,
+					Scope:  v.Scope,
+					Data:   v.Data.([]string),
+					Links:  links,
+				}, nil
+			}
+			return nil, errors.New("invalid product value")
+		}
 	}
 	// if v.Data != nil-> simple select, multi select
 	if v.LinkedData != nil {
@@ -245,6 +268,36 @@ func (v MediaValue) DownloadURL() string {
 		return v.Links.Download.Href
 	}
 	return ""
+}
+
+// MeidaSet
+type MediaSet struct {
+	Locale string   `json:"locale,omitempty" mapstructure:"locale"`
+	Scope  string   `json:"scope,omitempty" mapstructure:"scope"`
+	Data   []string `json:"data,omitempty" mapstructure:"data"`
+	Links  []*Links `json:"_links,omitempty" mapstructure:"_links"`
+}
+
+func (MediaSet) ValueType() int {
+	return ValueTypeMediaSet
+}
+
+// DownloadURLs returns the download urls of the media set
+func (v MediaSet) DownloadURLs() []string {
+	us := make([]string, len(v.Links))
+	for i, link := range v.Links {
+		us[i] = link.Download.Href
+	}
+	return us
+}
+
+// Hrefs returns the hrefs of the media set
+func (v MediaSet) Hrefs() []string {
+	us := make([]string, len(v.Links))
+	for i, link := range v.Links {
+		us[i] = link.Self.Href
+	}
+	return us
 }
 
 // StringValue is the struct for an akeneo text type product value
