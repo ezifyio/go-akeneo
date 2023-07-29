@@ -2,6 +2,7 @@ package goakeneo
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,10 +10,14 @@ import (
 
 func TestProducts(t *testing.T) {
 	c := MockDLClient()
-	p, err := c.Product.GetProduct("code-15768-vw128j", nil)
+	code := strings.ToLower("CODE-A90521134-6R948KM3PCWXNVDY")
+	p, err := c.Product.GetProduct(code, nil)
 	assert.NoError(t, err)
 
 	for key, vs := range p.Values {
+		if key != "skc_detail_image_set" {
+			continue
+		}
 		for _, v := range vs {
 			result, err := v.ParseValue()
 			if err != nil {

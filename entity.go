@@ -116,7 +116,7 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 		if _, ok := v.Data.(string); ok {
 			link, ok := v.Links.(*Links)
 			if !ok {
-				return nil, errors.New("invalid links")
+				return nil, errors.New("invalid single links")
 			}
 			return MediaValue{
 				Locale: v.Locale,
@@ -124,21 +124,41 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 				Data:   v.Data.(string),
 				Links:  link,
 			}, nil
-		} else {
-			links, ok := v.Links.([]*Links)
-			if !ok {
-				return nil, errors.New("invalid links")
-			}
-			if _, ok := v.Data.([]string); ok {
-				return MediaSet{
-					Locale: v.Locale,
-					Scope:  v.Scope,
-					Data:   v.Data.([]string),
-					Links:  links,
-				}, nil
-			}
-			return nil, errors.New("invalid product value")
 		}
+		data, ok := v.Data.([]interface{})
+		if !ok {
+			return nil, errors.New("invalid data,should be []interface{}")
+		}
+		links, ok := v.Links.([]interface{})
+		if !ok {
+			return nil, errors.New("invalid  links slices,should be []interface{}")
+		}
+		s := MediaSet{}
+		for i, d := range data {
+			ds, ok := d.(string)
+			if !ok {
+				return nil, errors.New("invalid data elem,should be string")
+			}
+			s.Data = append(s.Data, ds)
+
+			ll, ok := links[i].(map[string]interface{})
+			if !ok {
+				return nil, errors.New("invalid links elem,should be *Links")
+			}
+			link := &Links{}
+			lldownload, ok := ll["download"].(map[string]interface{})
+			if !ok {
+				return nil, errors.New("invalid links download elem,should be *Links")
+			}
+			link.Download.Href = lldownload["href"].(string)
+			llself, ok := ll["self"].(map[string]interface{})
+			if !ok {
+				return nil, errors.New("invalid links self elem,should be *Links")
+			}
+			link.Self.Href = llself["href"].(string)
+			s.Links = append(s.Links, link)
+		}
+		return s, nil
 	}
 	// if v.Data != nil-> simple select, multi select
 	if v.LinkedData != nil {

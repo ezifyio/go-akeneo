@@ -8,6 +8,6 @@ func MockDLClient() *Client {
 		Password: "9b5468313",
 	}
 	c, _ := con.NewClient(
-		WithBaseURL("http://pim.zdldove.top/"))
+		WithBaseURL("https://newbella.ezify.cloud/"))
 	return c
 }
