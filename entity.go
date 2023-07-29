@@ -133,7 +133,7 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 		if !ok {
 			return nil, errors.New("invalid  links slices,should be []interface{}")
 		}
-		s := MediaSet{}
+		s := MediaSetValue{}
 		for i, d := range data {
 			ds, ok := d.(string)
 			if !ok {
@@ -290,20 +290,20 @@ func (v MediaValue) DownloadURL() string {
 	return ""
 }
 
-// MeidaSet
-type MediaSet struct {
+// MeidaSetValue
+type MediaSetValue struct {
 	Locale string   `json:"locale,omitempty" mapstructure:"locale"`
 	Scope  string   `json:"scope,omitempty" mapstructure:"scope"`
 	Data   []string `json:"data,omitempty" mapstructure:"data"`
 	Links  []*Links `json:"_links,omitempty" mapstructure:"_links"`
 }
 
-func (MediaSet) ValueType() int {
+func (MediaSetValue) ValueType() int {
 	return ValueTypeMediaSet
 }
 
 // DownloadURLs returns the download urls of the media set
-func (v MediaSet) DownloadURLs() []string {
+func (v MediaSetValue) DownloadURLs() []string {
 	us := make([]string, len(v.Links))
 	for i, link := range v.Links {
 		us[i] = link.Download.Href
@@ -312,7 +312,7 @@ func (v MediaSet) DownloadURLs() []string {
 }
 
 // Hrefs returns the hrefs of the media set
-func (v MediaSet) Hrefs() []string {
+func (v MediaSetValue) Hrefs() []string {
 	us := make([]string, len(v.Links))
 	for i, link := range v.Links {
 		us[i] = link.Self.Href
