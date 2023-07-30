@@ -114,16 +114,19 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 
 	if v.Links != nil {
 		if _, ok := v.Data.(string); ok {
-			link, ok := v.Links.(*Links)
-			if !ok {
-				return nil, errors.New("invalid single links")
-			}
-			return MediaValue{
+			result := MediaValue{
 				Locale: v.Locale,
 				Scope:  v.Scope,
 				Data:   v.Data.(string),
-				Links:  link,
-			}, nil
+			}
+			link, ok := v.Links.(map[string]interface{})
+			if !ok {
+				return nil, errors.New("invalid single links")
+			}
+			if err := mapstructure.Decode(link, &result.Links); err != nil {
+				return nil, err
+			}
+			return result, nil
 		}
 		data, ok := v.Data.([]interface{})
 		if !ok {
@@ -146,16 +149,9 @@ func (v ProductValue) ParseValue() (PimProductValue, error) {
 				return nil, errors.New("invalid links elem,should be *Links")
 			}
 			link := &Links{}
-			lldownload, ok := ll["download"].(map[string]interface{})
-			if !ok {
-				return nil, errors.New("invalid links download elem,should be *Links")
+			if err := mapstructure.Decode(ll, link); err != nil {
+				return nil, err
 			}
-			link.Download.Href = lldownload["href"].(string)
-			llself, ok := ll["self"].(map[string]interface{})
-			if !ok {
-				return nil, errors.New("invalid links self elem,should be *Links")
-			}
-			link.Self.Href = llself["href"].(string)
 			s.Links = append(s.Links, link)
 		}
 		return s, nil
